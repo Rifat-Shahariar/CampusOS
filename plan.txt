@@ -1,0 +1,574 @@
+CAMPUSOS — PROJECT PLAN
+=======================
+
+PROJECT
+-------
+Name: CampusOS
+Purpose: Smart Digital Campus Hub
+
+Hackathon:
+CPCCU AI-Powered Web App Development & Deployment Hackathon 2026
+
+MVP MODULES
+-----------
+1. Club & Event Engine
+2. Resource Hub
+
+The application must provide a real, functional end-to-end
+experience for both modules.
+
+ACCOUNT & ROLE SYSTEM
+---------------------
+
+1. ADMIN
+- Full platform access
+- Manage users
+- Manage clubs
+- Manage club admins
+- Manage resource admins
+- Manage events
+- Manage resources
+- Manage system settings
+- View platform-wide data
+- Create/manage official notices
+
+2. CLUB_ADMIN
+- Can manage one or multiple assigned clubs
+- Manage assigned club profiles
+- Create/edit/delete events for assigned clubs
+- Manage event registrations
+- Manage QR check-in
+- View attendance
+- Create/edit/delete club posts and announcements
+- Cannot manage unassigned clubs
+- Cannot manage resources unless separately authorized
+
+3. RESOURCE_ADMIN
+- Can manage resources for ANY course
+- Upload resources
+- Edit resources
+- Delete resources
+- Organize resources by course/category
+- Must specify batch and section when appropriate
+- Cannot manage events or clubs
+
+4. STUDENT
+- Register/login
+- Browse clubs
+- Browse events
+- Search/filter events
+- Register for events
+- View QR ticket
+- View registration history
+- Browse resources
+- Search/filter resources
+- Download resources
+
+
+TECH STACK
+----------
+
+Frontend:
+- Next.js
+- TypeScript
+- Tailwind CSS
+- shadcn/ui
+- React Hook Form
+- Zod
+
+Backend:
+- Node.js
+- NestJS
+- TypeScript
+- REST API
+- JWT Authentication
+- Role-Based Access Control
+- Swagger/OpenAPI
+
+Database:
+- PostgreSQL
+- Supabase
+- Prisma ORM
+
+Storage:
+- Supabase Storage
+
+Deployment:
+- Frontend → Vercel
+- Backend → Render
+- Database → Supabase
+
+Development:
+- GitHub
+- Monorepo
+- ESLint
+- Prettier
+
+
+REPOSITORY STRUCTURE
+--------------------
+
+CampusOS/
+├── frontend/
+├── backend/
+├── docs/
+├── README.md
+├── package.json
+└── ...
+
+
+FRONTEND ARCHITECTURE
+---------------------
+
+frontend/
+└── src/
+    ├── app/
+    │   ├── (auth)/
+    │   ├── dashboard/
+    │   ├── events/
+    │   ├── resources/
+    │   ├── clubs/
+    │   └── admin/
+    │
+    ├── features/
+    │   ├── auth/
+    │   ├── events/
+    │   ├── resources/
+    │   ├── clubs/
+    │   └── dashboard/
+    │
+    ├── components/
+    │   └── ui/
+    │
+    ├── lib/
+    │   ├── api/
+    │   ├── auth/
+    │   └── utils/
+    │
+    ├── hooks/
+    ├── types/
+    └── config/
+
+Feature-specific UI, hooks, API functions, schemas, types and
+utilities should remain inside their respective feature folders.
+
+Only genuinely reusable components/utilities should be placed
+in shared directories.
+
+
+BACKEND ARCHITECTURE
+--------------------
+
+backend/
+├── src/
+│   ├── auth/
+│   │   ├── controllers/
+│   │   ├── services/
+│   │   ├── guards/
+│   │   ├── strategies/
+│   │   └── dto/
+│   │
+│   ├── users/
+│   ├── clubs/
+│   ├── events/
+│   ├── registrations/
+│   ├── resources/
+│   ├── uploads/
+│   ├── database/
+│   └── common/
+│
+├── prisma/
+│   ├── schema.prisma
+│   ├── migrations/
+│   └── seed.ts
+│
+└── test/
+
+Each backend module should contain its own controllers,
+services, DTOs and module-specific logic.
+
+Database schema is managed by Prisma.
+
+
+DATABASE ENTITIES
+-----------------
+
+users
+- id UUID PK
+- name
+- email UNIQUE
+- password_hash
+- student_id nullable
+- batch nullable
+- section nullable
+- department_id FK nullable
+- role ENUM
+- avatar_url nullable
+- is_active
+- created_at
+- updated_at
+
+Roles:
+- ADMIN
+- CLUB_ADMIN
+- RESOURCE_ADMIN
+- STUDENT
+
+
+departments
+- id UUID PK
+- name
+- code UNIQUE
+- description nullable
+- is_active
+- created_at
+- updated_at
+
+
+clubs
+- id UUID PK
+- name
+- slug UNIQUE
+- description
+- logo_url nullable
+- cover_image_url nullable
+- contact_email nullable
+- is_active
+- created_at
+- updated_at
+
+
+club_admin_assignments
+- id UUID PK
+- user_id FK → users
+- club_id FK → clubs
+- assigned_at
+- assigned_by FK → users
+
+UNIQUE(user_id, club_id)
+
+
+events
+- id UUID PK
+- club_id FK → clubs
+- title
+- slug
+- description
+- cover_image_url nullable
+- event_type
+- location
+- start_time
+- end_time
+- registration_start nullable
+- registration_end nullable
+- max_attendees nullable
+- is_registration_required
+- is_active
+- created_by FK → users
+- created_at
+- updated_at
+
+
+event_registrations
+- id UUID PK
+- event_id FK → events
+- user_id FK → users
+- registration_code UNIQUE
+- qr_token UNIQUE
+- status
+- registered_at
+
+UNIQUE(event_id, user_id)
+
+
+event_attendance
+- id UUID PK
+- registration_id FK → event_registrations
+- checked_in_by FK → users
+- checked_in_at
+
+UNIQUE(registration_id)
+
+
+club_posts
+- id UUID PK
+- club_id FK → clubs
+- title
+- content
+- cover_image_url nullable
+- created_by FK → users
+- is_published
+- published_at nullable
+- created_at
+- updated_at
+
+
+official_notices
+- id UUID PK
+- title
+- content
+- attachment_url nullable
+- priority
+- is_published
+- created_by FK → users
+- published_at nullable
+- created_at
+- updated_at
+
+
+courses
+- id UUID PK
+- department_id FK → departments
+- code
+- name
+- description nullable
+- is_active
+- created_at
+- updated_at
+
+
+resources
+- id UUID PK
+- course_id FK → courses
+- title
+- description nullable
+- resource_type
+- file_name
+- file_url
+- file_size
+- mime_type
+- batch nullable
+- section nullable
+- uploaded_by FK → users
+- is_published
+- created_at
+- updated_at
+
+Resource types:
+- NOTE
+- QUESTION_PAPER
+- LAB_MANUAL
+- NOTICE
+- OTHER
+
+
+IMPORTANT RESOURCE RULE
+-----------------------
+
+Resource Admins do NOT require course assignment.
+
+Any RESOURCE_ADMIN may manage resources belonging to any course.
+
+Batch and section are stored as simple fields on the resource.
+
+Example:
+
+Course: CSE 2115
+Batch: 67
+Section: A
+Type: NOTE
+
+
+API BASE
+--------
+
+/api/v1/
+
+
+AUTH API
+--------
+
+POST   /api/v1/auth/register
+POST   /api/v1/auth/login
+GET    /api/v1/auth/me
+POST   /api/v1/auth/refresh
+POST   /api/v1/auth/logout
+
+
+CLUB API
+--------
+
+GET    /api/v1/clubs
+GET    /api/v1/clubs/:id
+GET    /api/v1/clubs/:id/events
+GET    /api/v1/clubs/:id/posts
+
+POST   /api/v1/clubs
+PATCH  /api/v1/clubs/:id
+DELETE /api/v1/clubs/:id
+
+POST   /api/v1/clubs/:id/admins
+GET    /api/v1/clubs/:id/admins
+DELETE /api/v1/clubs/:id/admins/:userId
+
+
+EVENT API
+---------
+
+GET    /api/v1/events
+GET    /api/v1/events/:id
+
+POST   /api/v1/events
+PATCH  /api/v1/events/:id
+DELETE /api/v1/events/:id
+
+POST   /api/v1/events/:id/register
+DELETE /api/v1/events/:id/register
+
+GET    /api/v1/events/:id/registrations
+GET    /api/v1/events/my-registrations
+
+GET    /api/v1/events/:id/my-ticket
+POST   /api/v1/events/:id/check-in
+GET    /api/v1/events/:id/attendance
+
+
+RESOURCE API
+------------
+
+GET    /api/v1/resources
+GET    /api/v1/resources/:id
+
+POST   /api/v1/resources
+PATCH  /api/v1/resources/:id
+DELETE /api/v1/resources/:id
+
+POST   /api/v1/uploads/resources
+
+
+COURSE API
+----------
+
+GET    /api/v1/departments
+GET    /api/v1/departments/:id
+GET    /api/v1/courses
+GET    /api/v1/courses/:id
+
+POST   /api/v1/departments
+PATCH  /api/v1/departments/:id
+DELETE /api/v1/departments/:id
+
+POST   /api/v1/courses
+PATCH  /api/v1/courses/:id
+DELETE /api/v1/courses/:id
+
+
+CLUB POST API
+-------------
+
+GET    /api/v1/clubs/:clubId/posts
+POST   /api/v1/clubs/:clubId/posts
+PATCH  /api/v1/clubs/:clubId/posts/:id
+DELETE /api/v1/clubs/:clubId/posts/:id
+
+
+OFFICIAL NOTICE API
+-------------------
+
+GET    /api/v1/notices
+GET    /api/v1/notices/:id
+
+POST   /api/v1/notices
+PATCH  /api/v1/notices/:id
+DELETE /api/v1/notices/:id
+
+
+AUTHORIZATION RULES
+-------------------
+
+ADMIN:
+- Full access
+
+CLUB_ADMIN:
+- Only assigned clubs
+- Events/posts/attendance for assigned clubs
+
+RESOURCE_ADMIN:
+- All resource operations
+- All courses
+- No event/club administration
+
+STUDENT:
+- Read public content
+- Register for events
+- View own registrations/tickets
+- Download resources
+
+
+SECURITY
+--------
+
+- Passwords must be securely hashed.
+- JWT authentication for protected APIs.
+- RBAC enforced on backend.
+- Club ownership/assignment must be verified server-side.
+- Frontend restrictions are NOT the security boundary.
+- Validate all request bodies using DTOs/Zod where appropriate.
+- Validate file type and file size before upload.
+- Never expose private credentials.
+- Never commit .env files.
+
+
+RESPONSIVE DESIGN
+-----------------
+
+The entire application must be optimized for:
+
+- Mobile phones
+- Tablets
+- Laptops
+- Desktop PCs
+- Large displays
+
+Use responsive/mobile-first design.
+
+Avoid:
+- horizontal overflow
+- fixed-width layouts
+- unusable tables on mobile
+- tiny touch targets
+- desktop-only navigation
+
+Admin dashboards must also remain usable on mobile.
+
+
+DOCUMENTATION
+-------------
+
+README.md must contain:
+
+- Project overview
+- Problem statement
+- Features
+- Modules
+- Architecture
+- Tech stack
+- Local setup
+- Environment variables
+- Database setup
+- Seed data
+- API documentation
+- Demo credentials
+- Deployment information
+- Real-world usability explanation
+
+
+DEVELOPMENT PRINCIPLE
+---------------------
+
+Build incrementally.
+
+Do not implement the entire project in one AI-agent prompt.
+
+After every major step:
+1. Run lint
+2. Run tests where applicable
+3. Run build
+4. Fix errors
+5. Verify functionality
+6. Commit changes
+
+Do not add features that are not in this plan without explicit approval.
+
+AI features are NOT part of the initial MVP.
+They may be added only after the core product is functional.

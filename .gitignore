@@ -1,0 +1,42 @@
+# Dependencies
+node_modules/
+
+# Build output
+dist/
+build/
+out/
+.next/
+*.tsbuildinfo
+
+# Environment files — never commit these
+.env
+.env.*
+!.env.example
+
+# Logs
+*.log
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+pnpm-debug.log*
+
+# Test coverage
+coverage/
+
+# Prisma generated client
+**/generated/
+**/prisma/generated/
+
+# Deployment
+.vercel/
+render.yaml
+
+# Local tooling
+.freebuff/
+
+# Editor / OS
+.DS_Store
+Thumbs.db
+.idea/
+.vscode/
+*.swp

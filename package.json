@@ -1,0 +1,37 @@
+{
+  "name": "campusos",
+  "version": "0.1.0",
+  "private": true,
+  "description": "CampusOS — Smart Digital Campus Hub (monorepo)",
+  "license": "UNLICENSED",
+  "workspaces": [
+    "frontend",
+    "backend"
+  ],
+  "engines": {
+    "node": ">=20.11.0"
+  },
+  "scripts": {
+    "dev": "concurrently --names frontend,backend --prefix-colors cyan,magenta \"npm:dev:frontend\" \"npm:dev:backend\"",
+    "dev:frontend": "npm run dev --workspace frontend",
+    "dev:backend": "npm run start:dev --workspace backend",
+    "build": "npm run build --workspaces",
+    "build:frontend": "npm run build --workspace frontend",
+    "build:backend": "npm run build --workspace backend",
+    "start:frontend": "npm run start --workspace frontend",
+    "start:backend": "npm run start:prod --workspace backend",
+    "lint": "npm run lint --workspaces",
+    "lint:frontend": "npm run lint --workspace frontend",
+    "lint:backend": "npm run lint --workspace backend",
+    "typecheck": "npm run typecheck --workspaces --if-present",
+    "format": "prettier --write .",
+    "format:check": "prettier --check .",
+    "prisma:validate": "npm run prisma:validate --workspace backend",
+    "prisma:generate": "npm run prisma:generate --workspace backend",
+    "test": "npm run test --workspaces --if-present"
+  },
+  "devDependencies": {
+    "concurrently": "^9.2.4",
+    "prettier": "^3.9.9"
+  }
+}
