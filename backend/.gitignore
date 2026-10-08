@@ -21,14 +21,13 @@ yarn-error.log*
 # tests
 /coverage
 
-# prisma generated client
+# prisma generated client (generated into src/ so the build picks it up)
 /generated
 /prisma/generated
+/src/generated
 
 # editor / OS
 .DS_Store
 .idea
 .vscode/*
 !.vscode/extensions.json
-
-/generated/prisma

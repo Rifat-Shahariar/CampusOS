@@ -14,7 +14,9 @@
 
 generator client {
   provider = "prisma-client"
-  output   = "../generated/prisma"
+  // Kept inside src/ so the NestJS build (rootDir: ./src) emits it into dist
+  // alongside the application code — no generated directory outside the build.
+  output   = "../src/generated/prisma"
 }
 
 datasource db {

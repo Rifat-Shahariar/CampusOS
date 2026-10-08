@@ -82,14 +82,17 @@ backend/
 │   ├── registrations/   # Event registration / check-in module
 │   ├── resources/       # Course resource module
 │   ├── uploads/         # File upload module (Supabase Storage)
-│   ├── database/        # Prisma integration module
+│   ├── database/        # Prisma integration module (DatabaseModule, PrismaService)
+│   ├── health/          # Liveness / readiness endpoints
+│   ├── config/          # Environment validation
+│   ├── generated/prisma/# Generated Prisma Client (git-ignored)
 │   └── common/          # guards, decorators, filters, interceptors, utils
 ├── prisma/
 │   ├── schema.prisma    # Prisma schema (models, enums, indexes)
 │   ├── migrations/      # Migration history
 │   └── seed.ts          # Development seed (wraps `prisma db seed`)
 ├── prisma7.config.ts    # Prisma 7 config: schema path, migrations, seed, URL
-├── generated/prisma/    # Generated Prisma Client (git-ignored)
+├── src/app.setup.ts     # Shared API config: prefix, CORS, validation, Swagger
 └── test/                # End-to-end tests
 ```
 
@@ -103,7 +106,23 @@ Rules:
   module talks to the database directly.
 - Configuration is read from environment variables (see `backend/.env.example`).
 
+### API foundation
+
 The REST API is served under the `/api/v1` prefix.
+
+- `src/main.ts` bootstraps the app, enables shutdown hooks (so `PrismaService`
+  disconnects cleanly) and passes the Express adapter explicitly.
+- `src/app.setup.ts` holds the shared configuration used by `main.ts` and the
+  end-to-end tests: the global prefix, CORS (from `FRONTEND_URL`), the global
+  `ValidationPipe` (`whitelist`, `forbidNonWhitelisted`, `transform`) and the
+  Swagger document. Body parsing is capped at 1 MB.
+- Swagger UI is mounted at `/api/docs` (JSON at `/api/docs/json`); new
+  controllers appear automatically via decorators.
+- `GET /api/v1/health` is a liveness probe that never touches the database;
+  `GET /api/v1/health/ready` reports database connectivity via `PrismaService`
+  and returns `503` when it is unreachable.
+- The Prisma connection is opened lazily on the first query, so an unreachable
+  database cannot block API startup.
 
 ## Database
 
@@ -111,12 +130,13 @@ PostgreSQL (Supabase) accessed through **Prisma ORM 7.10**.
 
 ### How Prisma is wired
 
-| Concern                                                    | Where                                                                  |
-| ---------------------------------------------------------- | ---------------------------------------------------------------------- |
-| Schema                                                     | `backend/prisma/schema.prisma`                                         |
-| CLI config (schema path, migrations, seed, connection URL) | `backend/prisma7.config.ts`                                            |
-| Runtime connection                                         | `@prisma/adapter-pg` — Prisma 7 requires a driver adapter at runtime   |
-| Generated client                                           | `backend/generated/prisma` (git-ignored, rebuilt by `prisma generate`) |
+| Concern                                                    | Where                                                                      |
+| ---------------------------------------------------------- | -------------------------------------------------------------------------- |
+| Schema                                                     | `backend/prisma/schema.prisma`                                             |
+| CLI config (schema path, migrations, seed, connection URL) | `backend/prisma7.config.ts`                                                |
+| Runtime connection                                         | `@prisma/adapter-pg` — Prisma 7 requires a driver adapter at runtime       |
+| Generated client                                           | `backend/src/generated/prisma` (git-ignored, rebuilt by `prisma generate`) |
+| Services inject                                            | `PrismaService` (global `DatabaseModule`, `@prisma/adapter-pg`)            |
 
 Prisma 7 does not read `.env` files by itself, so `prisma7.config.ts`, `src/main.ts`
 and `prisma/seed.ts` each load the environment with Node's built-in
@@ -260,6 +280,11 @@ connection when a migration needs to bypass the pooler.
 
 Resolved by owner decision: `events.slug` is now globally unique (canonical
 `/events/:slug` URLs) and `courses.code` is now unique.
+
+Resolved in the backend foundation: the generated Prisma Client now lives at
+`backend/src/generated/prisma` (inside `rootDir`), so `nest build` emits it into
+`dist/` alongside the application code. Prisma-only connection-string options
+(`pgbouncer`, `schema`, …) are stripped before the URL reaches node-postgres.
 
 ## Code quality
 

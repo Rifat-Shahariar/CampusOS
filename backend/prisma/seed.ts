@@ -20,7 +20,7 @@ import {
   PrismaClient,
   ResourceType,
   UserRole,
-} from "../generated/prisma/client.js";
+} from "../src/generated/prisma/client.js";
 
 // Prisma 7 does not load .env files automatically.
 try {

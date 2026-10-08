@@ -10,6 +10,7 @@ export default tseslint.config(
       "dist/**",
       "coverage/**",
       "generated/**",
+      "src/generated/**",
       "node_modules/**",
       "prisma/generated/**",
     ],
