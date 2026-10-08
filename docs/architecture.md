@@ -174,6 +174,8 @@ event-type vocabulary yet.
 | `ClubPost`            | → Club, → User (creator)                                                                                                                                                                              |
 | `OfficialNotice`      | → User (creator)                                                                                                                                                                                      |     | `Course` | → Department, → many Resources. `code` is unique                                                                                  |
 | `Resource`            | → Course, → User (uploader). Batch/section are plain nullable strings                                                                                                                                 |
+| `RefreshTokenSession` | → User (`onDelete: CASCADE`). Persistent refresh-token sessions for multi-device login, surviving backend restarts. Stores SHA-256 token hash                                                          |
+
 
 There is deliberately **no** resource-admin assignment entity: any
 `RESOURCE_ADMIN` manages resources of any course, and there are no Batch or

@@ -77,9 +77,18 @@ export function applyAppSettings(app: INestApplication): INestApplication {
   const swaggerConfig = new DocumentBuilder()
     .setTitle("CampusOS API")
     .setDescription(
-      "Smart Digital Campus Hub — REST API. Foundation build: health endpoints only.",
+      "Smart Digital Campus Hub — REST API with Authentication & JWT.",
     )
     .setVersion("1.0")
+    .addBearerAuth(
+      {
+        type: "http",
+        scheme: "bearer",
+        bearerFormat: "JWT",
+        description: "Enter JWT access token",
+      },
+      "bearer",
+    )
     .build();
   const document = SwaggerModule.createDocument(app, swaggerConfig);
   SwaggerModule.setup(SWAGGER_PATH, app, document, {

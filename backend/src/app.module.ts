@@ -3,6 +3,7 @@ import { ConfigModule } from "@nestjs/config";
 import { validateEnv } from "./config/env.validation.js";
 import { DatabaseModule } from "./database/database.module.js";
 import { HealthModule } from "./health/health.module.js";
+import { AuthModule } from "./auth/auth.module.js";
 
 /**
  * CampusOS API root module (modular monolith).
@@ -22,6 +23,7 @@ import { HealthModule } from "./health/health.module.js";
     }),
     DatabaseModule,
     HealthModule,
+    AuthModule,
   ],
 })
 export class AppModule {}

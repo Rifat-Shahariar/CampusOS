@@ -83,6 +83,7 @@ model User {
   clubPosts            ClubPost[]
   officialNotices      OfficialNotice[]
   resourcesUploaded    Resource[]
+  refreshSessions      RefreshTokenSession[]
 
   @@index([departmentId])
   @@index([role])
@@ -325,4 +326,24 @@ model Resource {
   @@index([batch, section])
   @@index([uploadedBy])
   @@map("resources")
+}
+
+// ---------------------------------------------------------------------------
+// RefreshTokenSession — persistent refresh token sessions
+// ---------------------------------------------------------------------------
+
+model RefreshTokenSession {
+  id        String   @id @default(uuid()) @db.Uuid
+  userId    String   @map("user_id") @db.Uuid
+  tokenHash String   @unique @map("token_hash")
+  jti       String   @unique @map("jti")
+  expiresAt DateTime @map("expires_at")
+  createdAt DateTime @default(now()) @map("created_at")
+  updatedAt DateTime @updatedAt @map("updated_at")
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId])
+  @@index([expiresAt])
+  @@map("refresh_token_sessions")
 }
