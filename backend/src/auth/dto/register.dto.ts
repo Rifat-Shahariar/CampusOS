@@ -68,11 +68,11 @@ export class RegisterDto {
   )
   section?: string;
 
-  @ApiPropertyOptional({
+  @ApiProperty({
     example: "ca000000-0000-4000-8000-000000000001",
     description: "Department UUID",
   })
-  @IsOptional()
+  @IsNotEmpty({ message: "Department is required" })
   @IsUUID(4, { message: "departmentId must be a valid UUIDv4" })
-  departmentId?: string;
+  departmentId!: string;
 }

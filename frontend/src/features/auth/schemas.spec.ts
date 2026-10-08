@@ -37,6 +37,7 @@ describe("Frontend Auth Form Schemas", () => {
         name: "Rafid Hasan",
         email: "rafid@campusos.dev",
         password: "StrongPassword#2026",
+        confirmPassword: "StrongPassword#2026",
         studentId: "CSE-2023-142",
         batch: "67",
         section: "A",
@@ -45,13 +46,34 @@ describe("Frontend Auth Form Schemas", () => {
       expect(result.success).toBe(true);
     });
 
-    it("accepts optional fields omitted or empty", () => {
+    it("accepts optional fields omitted", () => {
       const result = registerSchema.safeParse({
         name: "Rafid Hasan",
         email: "rafid@campusos.dev",
         password: "StrongPassword#2026",
+        confirmPassword: "StrongPassword#2026",
+        departmentId: "ca000000-0000-4000-8000-000000000001",
       });
       expect(result.success).toBe(true);
+    });
+
+    it("rejects missing or empty departmentId", () => {
+      const resultMissing = registerSchema.safeParse({
+        name: "Rafid Hasan",
+        email: "rafid@campusos.dev",
+        password: "StrongPassword#2026",
+        confirmPassword: "StrongPassword#2026",
+      });
+      expect(resultMissing.success).toBe(false);
+
+      const resultEmpty = registerSchema.safeParse({
+        name: "Rafid Hasan",
+        email: "rafid@campusos.dev",
+        password: "StrongPassword#2026",
+        confirmPassword: "StrongPassword#2026",
+        departmentId: "",
+      });
+      expect(resultEmpty.success).toBe(false);
     });
 
     it("rejects password shorter than 8 characters", () => {
@@ -59,6 +81,8 @@ describe("Frontend Auth Form Schemas", () => {
         name: "Rafid Hasan",
         email: "rafid@campusos.dev",
         password: "short",
+        confirmPassword: "short",
+        departmentId: "ca000000-0000-4000-8000-000000000001",
       });
       expect(result.success).toBe(false);
       if (!result.success) {
@@ -66,14 +90,33 @@ describe("Frontend Auth Form Schemas", () => {
       }
     });
 
-    it("rejects invalid UUID departmentId when non-empty", () => {
+    it("rejects invalid UUID departmentId", () => {
       const result = registerSchema.safeParse({
         name: "Rafid Hasan",
         email: "rafid@campusos.dev",
         password: "StrongPassword#2026",
+        confirmPassword: "StrongPassword#2026",
         departmentId: "not-a-valid-uuid",
       });
       expect(result.success).toBe(false);
+    });
+
+    it("rejects when confirmPassword does not match password", () => {
+      const result = registerSchema.safeParse({
+        name: "Rafid Hasan",
+        email: "rafid@campusos.dev",
+        password: "StrongPassword#2026",
+        confirmPassword: "DifferentPassword#2026",
+        departmentId: "ca000000-0000-4000-8000-000000000001",
+      });
+      expect(result.success).toBe(false);
+      if (!result.success) {
+        const mismatchIssue = result.error.issues.find(
+          (issue) => issue.path.includes("confirmPassword"),
+        );
+        expect(mismatchIssue).toBeDefined();
+        expect(mismatchIssue?.message).toBe("Passwords do not match");
+      }
     });
   });
 });

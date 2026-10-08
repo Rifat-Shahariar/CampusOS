@@ -143,13 +143,58 @@ async function seedDepartments() {
   const departments = [
     {
       code: "CSE",
-      name: "Computer Science & Engineering",
+      name: "Department of Computer Science & Engineering (CSE)",
       description: "Software, systems and computing research.",
     },
     {
       code: "EEE",
-      name: "Electrical & Electronic Engineering",
+      name: "Department of Electrical & Electronic Engineering (EEE)",
       description: "Electrical, electronics and power systems.",
+    },
+    {
+      code: "ME",
+      name: "Department of Mechanical Engineering",
+      description: "Thermal, fluid and machine design.",
+    },
+    {
+      code: "CE",
+      name: "Department of Civil Engineering",
+      description: "Structural, transportation and environmental engineering.",
+    },
+    {
+      code: "TE",
+      name: "Department of Textile Engineering",
+      description: "Fiber, yarn and apparel manufacturing.",
+    },
+    {
+      code: "PHARM",
+      name: "Department of Pharmacy",
+      description: "Pharmaceutical chemistry and clinical pharmacy.",
+    },
+    {
+      code: "SH",
+      name: "Department of Science & Humanities",
+      description: "Mathematics, physics, chemistry and social sciences.",
+    },
+    {
+      code: "BBA",
+      name: "Department of Business Administration",
+      description: "Finance, marketing, management and entrepreneurship.",
+    },
+    {
+      code: "ENG",
+      name: "Department of English",
+      description: "Literature, linguistics and communication studies.",
+    },
+    {
+      code: "LAW",
+      name: "Department of Law",
+      description: "Jurisprudence, constitutional and international law.",
+    },
+    {
+      code: "AGRI",
+      name: "Department of Agriculture",
+      description: "Agronomy, horticulture and agricultural sciences.",
     },
   ];
 

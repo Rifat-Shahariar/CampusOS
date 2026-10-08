@@ -1,12 +1,14 @@
 "use client";
 
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
+import { ChevronDown, Loader2 } from "lucide-react";
 import { registerSchema, type RegisterFormData } from "./schemas";
 import { useAuth } from "./auth-context";
+import { getDepartments } from "./api/departments-api";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import {
@@ -18,11 +20,17 @@ import {
   CardTitle,
 } from "@/components/ui/card";
 import { ApiError } from "@/lib/api";
+import { cn } from "@/lib/utils";
+import type { Department } from "@/types";
 
 export function RegisterForm() {
   const router = useRouter();
   const { register: registerUser } = useAuth();
   const [apiError, setApiError] = useState<string | null>(null);
+
+  const [departments, setDepartments] = useState<Department[]>([]);
+  const [isLoadingDepts, setIsLoadingDepts] = useState<boolean>(true);
+  const [deptLoadError, setDeptLoadError] = useState<string | null>(null);
 
   const {
     register,
@@ -34,6 +42,7 @@ export function RegisterForm() {
       name: "",
       email: "",
       password: "",
+      confirmPassword: "",
       studentId: "",
       batch: "",
       section: "",
@@ -41,10 +50,38 @@ export function RegisterForm() {
     },
   });
 
+  useEffect(() => {
+    let isMounted = true;
+
+    async function fetchDepartments() {
+      try {
+        setIsLoadingDepts(true);
+        setDeptLoadError(null);
+        const data = await getDepartments();
+        if (isMounted) {
+          setDepartments(data);
+        }
+      } catch {
+        if (isMounted) {
+          setDeptLoadError("Unable to load departments. Please refresh the page.");
+        }
+      } finally {
+        if (isMounted) {
+          setIsLoadingDepts(false);
+        }
+      }
+    }
+
+    fetchDepartments();
+
+    return () => {
+      isMounted = false;
+    };
+  }, []);
+
   const onSubmit = async (data: RegisterFormData) => {
     setApiError(null);
     try {
-      // Normalize departmentId: omit empty strings so backend receives undefined/null
       const payload = {
         name: data.name,
         email: data.email,
@@ -52,7 +89,7 @@ export function RegisterForm() {
         studentId: data.studentId || undefined,
         batch: data.batch || undefined,
         section: data.section || undefined,
-        departmentId: data.departmentId || undefined,
+        departmentId: data.departmentId,
       };
 
       await registerUser(payload);
@@ -103,43 +140,97 @@ export function RegisterForm() {
           />
 
           <Input
-            label="Password (min 8 characters) *"
-            type="password"
-            placeholder="••••••••"
-            autoComplete="new-password"
-            error={errors.password?.message}
-            {...register("password")}
+            label="Student ID / Roll"
+            placeholder="CSE-2023-142"
+            error={errors.studentId?.message}
+            {...register("studentId")}
           />
 
-          <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-            <Input
-              label="Student ID / Roll"
-              placeholder="CSE-2023-142"
-              error={errors.studentId?.message}
-              {...register("studentId")}
-            />
+          {/* Department Selection Dropdown */}
+          <div className="w-full space-y-1.5 text-left">
+            <label
+              htmlFor="department"
+              className="block text-xs font-medium text-foreground tracking-tight"
+            >
+              Department *
+            </label>
+            <div className="relative">
+              <select
+                id="department"
+                aria-label="Department"
+                disabled={isLoadingDepts || isSubmitting}
+                className={cn(
+                  "flex h-9 w-full rounded-lg border border-border bg-background px-3 py-1.5 text-sm text-foreground shadow-xs transition-colors appearance-none cursor-pointer pr-9",
+                  "focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:border-ring",
+                  "disabled:cursor-not-allowed disabled:opacity-50",
+                  errors.departmentId && "border-destructive focus-visible:ring-destructive",
+                )}
+                {...register("departmentId")}
+              >
+                <option value="">
+                  {isLoadingDepts
+                    ? "Loading departments..."
+                    : "Select your department"}
+                </option>
+                {departments.map((dept) => (
+                  <option key={dept.id} value={dept.id}>
+                    {dept.name}
+                  </option>
+                ))}
+              </select>
+              <div className="pointer-events-none absolute inset-y-0 right-0 flex items-center pr-3 text-muted-foreground">
+                {isLoadingDepts ? (
+                  <Loader2 className="size-4 animate-spin" />
+                ) : (
+                  <ChevronDown className="size-4" />
+                )}
+              </div>
+            </div>
+            {deptLoadError && (
+              <p role="alert" className="text-xs font-medium text-destructive mt-1">
+                {deptLoadError}
+              </p>
+            )}
+            {errors.departmentId && (
+              <p role="alert" className="text-xs font-medium text-destructive mt-1 animate-in fade-in-50">
+                {errors.departmentId.message}
+              </p>
+            )}
+          </div>
 
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
             <Input
               label="Batch"
               placeholder="67"
               error={errors.batch?.message}
               {...register("batch")}
             />
-          </div>
 
-          <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
             <Input
               label="Section"
               placeholder="A"
               error={errors.section?.message}
               {...register("section")}
             />
+          </div>
+
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+            <Input
+              label="Password (min 8 characters) *"
+              type="password"
+              placeholder="••••••••"
+              autoComplete="new-password"
+              error={errors.password?.message}
+              {...register("password")}
+            />
 
             <Input
-              label="Department UUID (optional)"
-              placeholder="Optional department UUID"
-              error={errors.departmentId?.message}
-              {...register("departmentId")}
+              label="Confirm Password *"
+              type="password"
+              placeholder="••••••••"
+              autoComplete="new-password"
+              error={errors.confirmPassword?.message}
+              {...register("confirmPassword")}
             />
           </div>
         </CardContent>
@@ -148,7 +239,7 @@ export function RegisterForm() {
           <Button
             type="submit"
             className="w-full h-10 font-semibold cursor-pointer"
-            disabled={isSubmitting}
+            disabled={isSubmitting || isLoadingDepts}
           >
             {isSubmitting ? "Creating account..." : "Register as Student"}
           </Button>

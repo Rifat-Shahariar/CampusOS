@@ -1,4 +1,5 @@
 import {
+  BadRequestException,
   ConflictException,
   NotFoundException,
   UnauthorizedException,
@@ -174,10 +175,32 @@ describe("AuthService", () => {
       );
     });
 
-    it("rejects non-existent or inactive department with NotFoundException", async () => {
+    it("rejects missing department with BadRequestException", async () => {
+      prismaMock.user.findUnique.mockResolvedValueOnce(null);
+      prismaMock.user.findUnique.mockResolvedValueOnce(null);
+
+      await expect(
+        authService.register({ ...registerDto, departmentId: "" as any }),
+      ).rejects.toThrow(BadRequestException);
+    });
+
+    it("rejects non-existent department with NotFoundException", async () => {
       prismaMock.user.findUnique.mockResolvedValueOnce(null);
       prismaMock.user.findUnique.mockResolvedValueOnce(null);
       prismaMock.department.findUnique.mockResolvedValueOnce(null);
+
+      await expect(authService.register(registerDto)).rejects.toThrow(
+        NotFoundException,
+      );
+    });
+
+    it("rejects inactive department with NotFoundException", async () => {
+      prismaMock.user.findUnique.mockResolvedValueOnce(null);
+      prismaMock.user.findUnique.mockResolvedValueOnce(null);
+      prismaMock.department.findUnique.mockResolvedValueOnce({
+        id: registerDto.departmentId,
+        isActive: false,
+      });
 
       await expect(authService.register(registerDto)).rejects.toThrow(
         NotFoundException,

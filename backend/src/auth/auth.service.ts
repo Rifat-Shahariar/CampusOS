@@ -1,4 +1,5 @@
 import {
+  BadRequestException,
   ConflictException,
   Injectable,
   NotFoundException,
@@ -75,17 +76,19 @@ export class AuthService {
       }
     }
 
-    // 3. Verify referenced department exists if provided
-    if (dto.departmentId) {
-      const department = await this.prisma.department.findUnique({
-        where: { id: dto.departmentId },
-        select: { id: true, isActive: true },
-      });
-      if (!department || !department.isActive) {
-        throw new NotFoundException(
-          "Referenced department not found or inactive",
-        );
-      }
+    // 3. Verify referenced department exists and is active
+    if (!dto.departmentId) {
+      throw new BadRequestException("Department is required");
+    }
+
+    const department = await this.prisma.department.findUnique({
+      where: { id: dto.departmentId },
+      select: { id: true, isActive: true },
+    });
+    if (!department || !department.isActive) {
+      throw new NotFoundException(
+        "Referenced department not found or inactive",
+      );
     }
 
     // 4. Hash password
@@ -100,7 +103,7 @@ export class AuthService {
         studentId: dto.studentId ?? null,
         batch: dto.batch ?? null,
         section: dto.section ?? null,
-        departmentId: dto.departmentId ?? null,
+        departmentId: dto.departmentId,
         role: UserRole.STUDENT,
         isActive: true,
       },

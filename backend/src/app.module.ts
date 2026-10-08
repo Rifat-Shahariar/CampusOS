@@ -7,6 +7,7 @@ import { AuthModule } from "./auth/auth.module.js";
 import { ClubsModule } from "./clubs/clubs.module.js";
 import { EventsModule } from "./events/events.module.js";
 import { ResourcesModule } from "./resources/resources.module.js";
+import { DepartmentsModule } from "./departments/departments.module.js";
 
 /**
  * CampusOS API root module (modular monolith).
@@ -30,6 +31,7 @@ import { ResourcesModule } from "./resources/resources.module.js";
     ClubsModule,
     EventsModule,
     ResourcesModule,
+    DepartmentsModule,
   ],
 })
 export class AppModule {}

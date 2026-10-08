@@ -14,7 +14,7 @@ export interface RegisterData {
   studentId?: string;
   batch?: string;
   section?: string;
-  departmentId?: string;
+  departmentId: string;
 }
 
 export const authService = {

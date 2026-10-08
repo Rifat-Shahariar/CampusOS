@@ -54,7 +54,30 @@ describe("Authentication & Persistent JWT Sessions (e2e)", () => {
       departmentId: testDeptId,
     };
 
-    // 1. POST /api/v1/auth/register
+    // 0a. Reject registration without departmentId
+    const missingDeptPayload = { ...registerPayload };
+    delete (missingDeptPayload as Record<string, unknown>).departmentId;
+    await request(app.getHttpServer())
+      .post(`/${API_PREFIX}/auth/register`)
+      .send(missingDeptPayload)
+      .expect(400);
+
+    // 0b. Reject registration with invalid UUID departmentId
+    await request(app.getHttpServer())
+      .post(`/${API_PREFIX}/auth/register`)
+      .send({ ...registerPayload, departmentId: "invalid-uuid" })
+      .expect(400);
+
+    // 0c. Reject registration with non-existent departmentId
+    await request(app.getHttpServer())
+      .post(`/${API_PREFIX}/auth/register`)
+      .send({
+        ...registerPayload,
+        departmentId: "00000000-0000-4000-8000-000000000000",
+      })
+      .expect(404);
+
+    // 1. POST /api/v1/auth/register (success with valid departmentId)
     const regRes = await request(app.getHttpServer())
       .post(`/${API_PREFIX}/auth/register`)
       .send(registerPayload)
