@@ -28,7 +28,7 @@ const navItems: NavItem[] = [
   { name: "Overview", href: "/dashboard", icon: LayoutDashboard },
   { name: "Clubs", href: "/clubs", icon: Compass },
   { name: "Events", href: "/events", icon: Calendar },
-  { name: "Resource Hub", href: "/dashboard/resources", icon: FileText },
+  { name: "Resource Hub", href: "/resources", icon: FileText },
 ];
 
 export function DashboardShell({ children }: { children: React.ReactNode }) {

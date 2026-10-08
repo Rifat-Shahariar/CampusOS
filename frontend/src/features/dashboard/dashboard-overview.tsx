@@ -93,10 +93,10 @@ export function DashboardOverview() {
           </CardHeader>
           <CardContent>
             <Link
-              href="/dashboard/resources"
+              href="/resources"
               className={cn(buttonVariants({ variant: "outline", size: "sm" }), "w-full cursor-pointer")}
             >
-              Access Resources
+              Browse Resources
             </Link>
           </CardContent>
         </Card>
