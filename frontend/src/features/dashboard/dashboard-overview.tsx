@@ -51,7 +51,7 @@ export function DashboardOverview() {
           </CardHeader>
           <CardContent>
             <Link
-              href="/dashboard/clubs"
+              href="/clubs"
               className={cn(buttonVariants({ variant: "outline", size: "sm" }), "w-full cursor-pointer")}
             >
               Explore Clubs

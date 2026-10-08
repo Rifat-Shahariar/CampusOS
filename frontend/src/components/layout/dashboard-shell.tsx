@@ -15,7 +15,7 @@ import {
   X,
 } from "lucide-react";
 import { useAuth } from "@/features/auth";
-import { Button } from "@/components/ui/button";
+import { Button, buttonVariants } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
 
 interface NavItem {
@@ -26,7 +26,7 @@ interface NavItem {
 
 const navItems: NavItem[] = [
   { name: "Overview", href: "/dashboard", icon: LayoutDashboard },
-  { name: "Clubs", href: "/dashboard/clubs", icon: Compass },
+  { name: "Clubs", href: "/clubs", icon: Compass },
   { name: "Events", href: "/dashboard/events", icon: Calendar },
   { name: "Resource Hub", href: "/dashboard/resources", icon: FileText },
 ];
@@ -70,31 +70,41 @@ export function DashboardShell({ children }: { children: React.ReactNode }) {
           })}
         </nav>
 
-        {/* User Card & Logout */}
+        {/* User Card & Logout / Sign In */}
         <div className="p-3 border-t border-border">
-          <div className="flex items-center gap-3 px-3 py-2 rounded-lg bg-muted/40">
-            <div className="flex size-8 items-center justify-center rounded-full bg-primary/10 text-primary">
-              <UserIcon className="size-4" />
+          {user ? (
+            <div className="flex items-center gap-3 px-3 py-2 rounded-lg bg-muted/40">
+              <div className="flex size-8 items-center justify-center rounded-full bg-primary/10 text-primary">
+                <UserIcon className="size-4" />
+              </div>
+              <div className="flex flex-col min-w-0 flex-1">
+                <span className="text-xs font-semibold truncate">{user.name}</span>
+                <span className="text-[10px] text-muted-foreground truncate">
+                  {user.role}
+                </span>
+              </div>
+              <Button
+                variant="ghost"
+                size="icon-xs"
+                onClick={() => logout()}
+                title="Sign out"
+                aria-label="Sign out"
+                className="text-muted-foreground hover:text-destructive cursor-pointer"
+              >
+                <LogOut className="size-4" />
+              </Button>
             </div>
-            <div className="flex flex-col min-w-0 flex-1">
-              <span className="text-xs font-semibold truncate">
-                {user?.name || "Student"}
-              </span>
-              <span className="text-[10px] text-muted-foreground truncate">
-                {user?.role}
-              </span>
-            </div>
-            <Button
-              variant="ghost"
-              size="icon-xs"
-              onClick={() => logout()}
-              title="Sign out"
-              aria-label="Sign out"
-              className="text-muted-foreground hover:text-destructive cursor-pointer"
+          ) : (
+            <Link
+              href="/login"
+              className={cn(
+                buttonVariants({ variant: "outline", size: "sm" }),
+                "w-full justify-center text-xs font-medium cursor-pointer",
+              )}
             >
-              <LogOut className="size-4" />
-            </Button>
-          </div>
+              Sign In
+            </Link>
+          )}
         </div>
       </aside>
 
@@ -119,19 +129,33 @@ export function DashboardShell({ children }: { children: React.ReactNode }) {
             <span className="text-sm font-semibold md:hidden">CampusOS</span>
           </div>
 
-          <div className="flex items-center gap-4">
-            <span className="hidden sm:inline-block text-xs text-muted-foreground">
-              {user?.email}
-            </span>
-            <Button
-              variant="outline"
-              size="sm"
-              onClick={() => logout()}
-              className="gap-2 text-xs cursor-pointer"
-            >
-              <LogOut className="size-3.5" />
-              <span>Logout</span>
-            </Button>
+          <div className="flex items-center gap-3">
+            {user ? (
+              <>
+                <span className="hidden sm:inline-block text-xs text-muted-foreground">
+                  {user.email}
+                </span>
+                <Button
+                  variant="outline"
+                  size="sm"
+                  onClick={() => logout()}
+                  className="gap-2 text-xs cursor-pointer"
+                >
+                  <LogOut className="size-3.5" />
+                  <span>Logout</span>
+                </Button>
+              </>
+            ) : (
+              <Link
+                href="/login"
+                className={cn(
+                  buttonVariants({ variant: "outline", size: "sm" }),
+                  "text-xs cursor-pointer",
+                )}
+              >
+                Sign In
+              </Link>
+            )}
           </div>
         </header>
 
