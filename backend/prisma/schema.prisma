@@ -157,7 +157,7 @@ model Event {
   id                     String    @id @default(uuid()) @db.Uuid
   clubId                 String    @map("club_id") @db.Uuid
   title                  String
-  slug                   String
+  slug                   String    @unique
   description            String
   coverImageUrl          String?   @map("cover_image_url")
   eventType              String    @map("event_type")
@@ -277,7 +277,7 @@ model OfficialNotice {
 model Course {
   id           String   @id @default(uuid()) @db.Uuid
   departmentId String   @map("department_id") @db.Uuid
-  code         String
+  code         String   @unique
   name         String
   description  String?
   isActive     Boolean  @default(true) @map("is_active")

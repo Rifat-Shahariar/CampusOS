@@ -148,13 +148,11 @@ event-type vocabulary yet.
 | `User`                | → Department (optional), ← ClubAdminAssignment (as admin _and_ as assigner), ← Event (creator), ← EventRegistration, ← EventAttendance (checker), ← ClubPost, ← OfficialNotice, ← Resource (uploader) |
 | `Department`          | → many Users, → many Courses                                                                                                                                                                          |
 | `Club`                | → many ClubAdminAssignments, → many Events, → many ClubPosts                                                                                                                                          |
-| `ClubAdminAssignment` | → User (the admin), → Club, → User (assignedBy). `unique(userId, clubId)` — one user may administer **many** clubs                                                                                    |
-| `Event`               | → Club, → User (creator), → many EventRegistrations. Indexed on clubId, startTime, eventType, isActive                                                                                                |
+| `ClubAdminAssignment` | → User (the admin), → Club, → User (assignedBy). `unique(userId, clubId)` — one user may administer **many** clubs                                                                                    |     | `Event`  | → Club, → User (creator), → many EventRegistrations. `slug` is globally unique. Indexed on clubId, startTime, eventType, isActive |
 | `EventRegistration`   | → Event, → User, ← EventAttendance. `unique(eventId, userId)` — one registration per student per event; `unique(registrationCode)`, `unique(qrToken)`                                                 |
 | `EventAttendance`     | → EventRegistration (`unique(registrationId)` — one check-in per registration), → User (checkedInBy)                                                                                                  |
 | `ClubPost`            | → Club, → User (creator)                                                                                                                                                                              |
-| `OfficialNotice`      | → User (creator)                                                                                                                                                                                      |
-| `Course`              | → Department, → many Resources                                                                                                                                                                        |
+| `OfficialNotice`      | → User (creator)                                                                                                                                                                                      |     | `Course` | → Department, → many Resources. `code` is unique                                                                                  |
 | `Resource`            | → Course, → User (uploader). Batch/section are plain nullable strings                                                                                                                                 |
 
 There is deliberately **no** resource-admin assignment entity: any
@@ -255,14 +253,13 @@ connection when a migration needs to bypass the pooler.
 
 ### Known gaps
 
-- `events.slug` and `courses.code` are **not** unique — the approved field list
-  marks only `clubs.slug` and `departments.code` as unique. Public slug routing
-  and course-code lookups will need a constraint (likely `unique(clubId, slug)`
-  and `unique(code)`). Confirm before relying on them.
 - `event_registrations.event_id` duplicates the leading column of
   `unique(event_id, user_id)`; it is kept because the approved index list requires it.
 - No `deleted_at` / soft-delete column exists; deactivation uses the existing
   `is_active` / `is_published` flags.
+
+Resolved by owner decision: `events.slug` is now globally unique (canonical
+`/events/:slug` URLs) and `courses.code` is now unique.
 
 ## Code quality
 
