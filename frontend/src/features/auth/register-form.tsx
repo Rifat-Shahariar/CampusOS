@@ -5,7 +5,7 @@ import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { ChevronDown, Loader2 } from "lucide-react";
+import { ChevronDown, Eye, EyeOff, Loader2 } from "lucide-react";
 import { registerSchema, type RegisterFormData } from "./schemas";
 import { useAuth } from "./auth-context";
 import { getDepartments } from "./api/departments-api";
@@ -31,6 +31,9 @@ export function RegisterForm() {
   const [departments, setDepartments] = useState<Department[]>([]);
   const [isLoadingDepts, setIsLoadingDepts] = useState<boolean>(true);
   const [deptLoadError, setDeptLoadError] = useState<string | null>(null);
+
+  const [showPassword, setShowPassword] = useState(false);
+  const [showConfirmPassword, setShowConfirmPassword] = useState(false);
 
   const {
     register,
@@ -217,19 +220,51 @@ export function RegisterForm() {
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
             <Input
               label="Password (min 8 characters) *"
-              type="password"
+              type={showPassword ? "text" : "password"}
               placeholder="••••••••"
               autoComplete="new-password"
               error={errors.password?.message}
+              rightAdornment={
+                <button
+                  type="button"
+                  onClick={() => setShowPassword((prev) => !prev)}
+                  className="text-muted-foreground hover:text-foreground cursor-pointer p-0.5 rounded transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+                  aria-label={showPassword ? "Hide password" : "Show password"}
+                >
+                  {showPassword ? (
+                    <EyeOff className="size-4" />
+                  ) : (
+                    <Eye className="size-4" />
+                  )}
+                </button>
+              }
               {...register("password")}
             />
 
             <Input
               label="Confirm Password *"
-              type="password"
+              type={showConfirmPassword ? "text" : "password"}
               placeholder="••••••••"
               autoComplete="new-password"
               error={errors.confirmPassword?.message}
+              rightAdornment={
+                <button
+                  type="button"
+                  onClick={() => setShowConfirmPassword((prev) => !prev)}
+                  className="text-muted-foreground hover:text-foreground cursor-pointer p-0.5 rounded transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+                  aria-label={
+                    showConfirmPassword
+                      ? "Hide confirm password"
+                      : "Show confirm password"
+                  }
+                >
+                  {showConfirmPassword ? (
+                    <EyeOff className="size-4" />
+                  ) : (
+                    <Eye className="size-4" />
+                  )}
+                </button>
+              }
               {...register("confirmPassword")}
             />
           </div>

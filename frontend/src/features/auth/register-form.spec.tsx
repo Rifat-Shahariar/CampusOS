@@ -1,5 +1,5 @@
 import React from "react";
-import { render, screen, waitFor } from "@testing-library/react";
+import { render, screen, waitFor, fireEvent } from "@testing-library/react";
 import { describe, expect, it, vi, beforeEach } from "vitest";
 import { RegisterForm } from "./register-form";
 import * as departmentsApi from "./api/departments-api";
@@ -115,5 +115,57 @@ describe("RegisterForm", () => {
         screen.getByText(/Unable to load departments/i),
       ).toBeInTheDocument();
     });
+  });
+
+  it("toggles password field visibility between password and text", async () => {
+    vi.spyOn(departmentsApi, "getDepartments").mockResolvedValue(mockDepartments);
+
+    render(<RegisterForm />);
+
+    await waitFor(() => {
+      expect(
+        screen.getByText("Department of Computer Science & Engineering (CSE)"),
+      ).toBeInTheDocument();
+    });
+
+    const passwordInput = screen.getByLabelText(/^Password/i);
+    expect(passwordInput).toHaveAttribute("type", "password");
+
+    const toggleBtn = screen.getByRole("button", { name: /Show password/i });
+    fireEvent.click(toggleBtn);
+
+    expect(passwordInput).toHaveAttribute("type", "text");
+    expect(screen.getByRole("button", { name: /Hide password/i })).toBeInTheDocument();
+
+    fireEvent.click(screen.getByRole("button", { name: /Hide password/i }));
+    expect(passwordInput).toHaveAttribute("type", "password");
+  });
+
+  it("toggles confirm password field visibility between password and text", async () => {
+    vi.spyOn(departmentsApi, "getDepartments").mockResolvedValue(mockDepartments);
+
+    render(<RegisterForm />);
+
+    await waitFor(() => {
+      expect(
+        screen.getByText("Department of Computer Science & Engineering (CSE)"),
+      ).toBeInTheDocument();
+    });
+
+    const confirmPasswordInput = screen.getByLabelText(/Confirm Password \*/i);
+    expect(confirmPasswordInput).toHaveAttribute("type", "password");
+
+    const toggleBtn = screen.getByRole("button", { name: /Show confirm password/i });
+    fireEvent.click(toggleBtn);
+
+    expect(confirmPasswordInput).toHaveAttribute("type", "text");
+    expect(
+      screen.getByRole("button", { name: /Hide confirm password/i }),
+    ).toBeInTheDocument();
+
+    fireEvent.click(
+      screen.getByRole("button", { name: /Hide confirm password/i }),
+    );
+    expect(confirmPasswordInput).toHaveAttribute("type", "password");
   });
 });

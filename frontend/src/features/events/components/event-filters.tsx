@@ -26,6 +26,12 @@ export function EventFilters({
   onFilterChange,
 }: EventFiltersProps) {
   const [searchValue, setSearchValue] = useState(initialSearch);
+  const [prevInitialSearch, setPrevInitialSearch] = useState(initialSearch);
+
+  if (initialSearch !== prevInitialSearch) {
+    setPrevInitialSearch(initialSearch);
+    setSearchValue(initialSearch);
+  }
 
   const handleSearchSubmit = (e: React.FormEvent) => {
     e.preventDefault();

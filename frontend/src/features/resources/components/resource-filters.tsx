@@ -42,8 +42,26 @@ export function ResourceFilters({
   onResetFilters,
 }: ResourceFiltersProps) {
   const [searchValue, setSearchValue] = useState(initialSearch);
+  const [prevInitialSearch, setPrevInitialSearch] = useState(initialSearch);
+  if (initialSearch !== prevInitialSearch) {
+    setPrevInitialSearch(initialSearch);
+    setSearchValue(initialSearch);
+  }
+
   const [batchValue, setBatchValue] = useState(selectedBatch);
+  const [prevSelectedBatch, setPrevSelectedBatch] = useState(selectedBatch);
+  if (selectedBatch !== prevSelectedBatch) {
+    setPrevSelectedBatch(selectedBatch);
+    setBatchValue(selectedBatch);
+  }
+
   const [sectionValue, setSectionValue] = useState(selectedSection);
+  const [prevSelectedSection, setPrevSelectedSection] = useState(selectedSection);
+  if (selectedSection !== prevSelectedSection) {
+    setPrevSelectedSection(selectedSection);
+    setSectionValue(selectedSection);
+  }
+
   const { courses, isLoading: isCoursesLoading } = useResourceCourses();
 
   const handleSearchSubmit = (e: React.FormEvent) => {

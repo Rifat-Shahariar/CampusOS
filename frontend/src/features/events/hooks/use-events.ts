@@ -19,43 +19,59 @@ export function useEvents(initialParams: EventsQueryParams = {}) {
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
-  const [params, setParams] = useState<EventsQueryParams>(initialParams);
+  const [overrides, setOverrides] = useState<Partial<EventsQueryParams>>({});
+  const [prevInitialParams, setPrevInitialParams] = useState(initialParams);
 
-  const fetchEvents = useCallback(
-    (queryParams: EventsQueryParams) => {
-      let isCurrent = true;
+  const hasInitialParamsChanged =
+    initialParams.search !== prevInitialParams.search ||
+    initialParams.eventType !== prevInitialParams.eventType ||
+    initialParams.clubId !== prevInitialParams.clubId ||
+    initialParams.clubSlug !== prevInitialParams.clubSlug ||
+    initialParams.startDate !== prevInitialParams.startDate ||
+    initialParams.endDate !== prevInitialParams.endDate ||
+    initialParams.page !== prevInitialParams.page ||
+    initialParams.limit !== prevInitialParams.limit;
 
-      eventsApi
-        .getEvents(queryParams)
-        .then((res) => {
-          if (isCurrent) {
-            setEvents(res.data);
-            setMeta(res.meta);
-            setError(null);
-            setIsLoading(false);
-          }
-        })
-        .catch((err) => {
-          if (isCurrent) {
-            setError(err?.message || "Failed to load events");
-            setIsLoading(false);
-          }
-        });
+  if (hasInitialParamsChanged) {
+    setPrevInitialParams(initialParams);
+    setOverrides({});
+  }
 
-      return () => {
-        isCurrent = false;
-      };
-    },
-    [],
-  );
+  const params: EventsQueryParams = {
+    ...initialParams,
+    ...overrides,
+  };
+
+  const { search, eventType, clubId, clubSlug, startDate, endDate, page, limit } = params;
 
   useEffect(() => {
-    return fetchEvents(params);
-  }, [fetchEvents, params]);
+    let isCurrent = true;
+
+    eventsApi
+      .getEvents({ search, eventType, clubId, clubSlug, startDate, endDate, page, limit })
+      .then((res) => {
+        if (isCurrent) {
+          setEvents(res.data);
+          setMeta(res.meta);
+          setError(null);
+          setIsLoading(false);
+        }
+      })
+      .catch((err) => {
+        if (isCurrent) {
+          setError(err?.message || "Failed to load events");
+          setIsLoading(false);
+        }
+      });
+
+    return () => {
+      isCurrent = false;
+    };
+  }, [search, eventType, clubId, clubSlug, startDate, endDate, page, limit]);
 
   const updateFilters = useCallback((newParams: Partial<EventsQueryParams>) => {
     setIsLoading(true);
-    setParams((prev) => ({
+    setOverrides((prev) => ({
       ...prev,
       ...newParams,
       // Reset to page 1 on filter/search change unless page is explicitly changed
@@ -65,8 +81,19 @@ export function useEvents(initialParams: EventsQueryParams = {}) {
 
   const refetch = useCallback(() => {
     setIsLoading(true);
-    fetchEvents(params);
-  }, [fetchEvents, params]);
+    eventsApi
+      .getEvents({ search, eventType, clubId, clubSlug, startDate, endDate, page, limit })
+      .then((res) => {
+        setEvents(res.data);
+        setMeta(res.meta);
+        setError(null);
+        setIsLoading(false);
+      })
+      .catch((err) => {
+        setError(err?.message || "Failed to load events");
+        setIsLoading(false);
+      });
+  }, [search, eventType, clubId, clubSlug, startDate, endDate, page, limit]);
 
   return {
     events,

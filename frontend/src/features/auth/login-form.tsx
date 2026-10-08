@@ -5,6 +5,7 @@ import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
+import { Eye, EyeOff } from "lucide-react";
 import { loginSchema, type LoginFormData } from "./schemas";
 import { useAuth } from "./auth-context";
 import { Input } from "@/components/ui/input";
@@ -23,6 +24,7 @@ export function LoginForm() {
   const router = useRouter();
   const { login } = useAuth();
   const [apiError, setApiError] = useState<string | null>(null);
+  const [showPassword, setShowPassword] = useState(false);
 
   const {
     register,
@@ -80,10 +82,24 @@ export function LoginForm() {
 
           <Input
             label="Password"
-            type="password"
+            type={showPassword ? "text" : "password"}
             placeholder="••••••••"
             autoComplete="current-password"
             error={errors.password?.message}
+            rightAdornment={
+              <button
+                type="button"
+                onClick={() => setShowPassword((prev) => !prev)}
+                className="text-muted-foreground hover:text-foreground cursor-pointer p-0.5 rounded transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+                aria-label={showPassword ? "Hide password" : "Show password"}
+              >
+                {showPassword ? (
+                  <EyeOff className="size-4" />
+                ) : (
+                  <Eye className="size-4" />
+                )}
+              </button>
+            }
             {...register("password")}
           />
         </CardContent>

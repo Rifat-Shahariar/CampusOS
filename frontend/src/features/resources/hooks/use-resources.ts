@@ -19,44 +19,60 @@ export function useResources(initialParams: ResourcesQueryParams = {}) {
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
-  const [params, setParams] = useState<ResourcesQueryParams>(initialParams);
+  const [overrides, setOverrides] = useState<Partial<ResourcesQueryParams>>({});
+  const [prevInitialParams, setPrevInitialParams] = useState(initialParams);
 
-  const fetchResources = useCallback(
-    (queryParams: ResourcesQueryParams) => {
-      let isCurrent = true;
+  const hasInitialParamsChanged =
+    initialParams.search !== prevInitialParams.search ||
+    initialParams.courseId !== prevInitialParams.courseId ||
+    initialParams.resourceType !== prevInitialParams.resourceType ||
+    initialParams.type !== prevInitialParams.type ||
+    initialParams.batch !== prevInitialParams.batch ||
+    initialParams.section !== prevInitialParams.section ||
+    initialParams.page !== prevInitialParams.page ||
+    initialParams.limit !== prevInitialParams.limit;
 
-      resourcesApi
-        .getResources(queryParams)
-        .then((res) => {
-          if (isCurrent) {
-            setResources(res.data);
-            setMeta(res.meta);
-            setError(null);
-            setIsLoading(false);
-          }
-        })
-        .catch((err) => {
-          if (isCurrent) {
-            setError(err?.message || "Failed to load resources");
-            setIsLoading(false);
-          }
-        });
+  if (hasInitialParamsChanged) {
+    setPrevInitialParams(initialParams);
+    setOverrides({});
+  }
 
-      return () => {
-        isCurrent = false;
-      };
-    },
-    [],
-  );
+  const params: ResourcesQueryParams = {
+    ...initialParams,
+    ...overrides,
+  };
+
+  const { search, courseId, resourceType, type, batch, section, page, limit } = params;
 
   useEffect(() => {
-    return fetchResources(params);
-  }, [fetchResources, params]);
+    let isCurrent = true;
+
+    resourcesApi
+      .getResources({ search, courseId, resourceType, type, batch, section, page, limit })
+      .then((res) => {
+        if (isCurrent) {
+          setResources(res.data);
+          setMeta(res.meta);
+          setError(null);
+          setIsLoading(false);
+        }
+      })
+      .catch((err) => {
+        if (isCurrent) {
+          setError(err?.message || "Failed to load resources");
+          setIsLoading(false);
+        }
+      });
+
+    return () => {
+      isCurrent = false;
+    };
+  }, [search, courseId, resourceType, type, batch, section, page, limit]);
 
   const updateFilters = useCallback(
     (newParams: Partial<ResourcesQueryParams>) => {
       setIsLoading(true);
-      setParams((prev) => ({
+      setOverrides((prev) => ({
         ...prev,
         ...newParams,
         page: newParams.page !== undefined ? newParams.page : 1,
@@ -67,8 +83,19 @@ export function useResources(initialParams: ResourcesQueryParams = {}) {
 
   const refetch = useCallback(() => {
     setIsLoading(true);
-    fetchResources(params);
-  }, [fetchResources, params]);
+    resourcesApi
+      .getResources({ search, courseId, resourceType, type, batch, section, page, limit })
+      .then((res) => {
+        setResources(res.data);
+        setMeta(res.meta);
+        setError(null);
+        setIsLoading(false);
+      })
+      .catch((err) => {
+        setError(err?.message || "Failed to load resources");
+        setIsLoading(false);
+      });
+  }, [search, courseId, resourceType, type, batch, section, page, limit]);
 
   return {
     resources,

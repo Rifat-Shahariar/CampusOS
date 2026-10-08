@@ -1,13 +1,14 @@
 import React from "react";
 import { cn } from "@/lib/utils";
 
-interface InputProps extends React.InputHTMLAttributes<HTMLInputElement> {
+export interface InputProps extends React.InputHTMLAttributes<HTMLInputElement> {
   label?: string;
   error?: string;
+  rightAdornment?: React.ReactNode;
 }
 
 export const Input = React.forwardRef<HTMLInputElement, InputProps>(
-  ({ className, type = "text", label, error, id, ...props }, ref) => {
+  ({ className, type = "text", label, error, id, rightAdornment, ...props }, ref) => {
     const inputId = id || (label ? label.toLowerCase().replace(/\s+/g, "-") : undefined);
 
     return (
@@ -20,20 +21,28 @@ export const Input = React.forwardRef<HTMLInputElement, InputProps>(
             {label}
           </label>
         )}
-        <input
-          id={inputId}
-          type={type}
-          ref={ref}
-          className={cn(
-            "flex h-9 w-full rounded-lg border border-border bg-background px-3 py-1.5 text-sm text-foreground shadow-xs transition-colors",
-            "placeholder:text-muted-foreground",
-            "focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:border-ring",
-            "disabled:cursor-not-allowed disabled:opacity-50",
-            error && "border-destructive focus-visible:ring-destructive",
-            className,
+        <div className="relative">
+          <input
+            id={inputId}
+            type={type}
+            ref={ref}
+            className={cn(
+              "flex h-9 w-full rounded-lg border border-border bg-background px-3 py-1.5 text-sm text-foreground shadow-xs transition-colors",
+              "placeholder:text-muted-foreground",
+              "focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:border-ring",
+              "disabled:cursor-not-allowed disabled:opacity-50",
+              error && "border-destructive focus-visible:ring-destructive",
+              rightAdornment && "pr-9",
+              className,
+            )}
+            {...props}
+          />
+          {rightAdornment && (
+            <div className="absolute inset-y-0 right-0 flex items-center pr-2.5">
+              {rightAdornment}
+            </div>
           )}
-          {...props}
-        />
+        </div>
         {error && (
           <p className="text-xs font-medium text-destructive mt-1 animate-in fade-in-50">
             {error}
