@@ -72,7 +72,7 @@ export function DashboardOverview() {
           </CardHeader>
           <CardContent>
             <Link
-              href="/dashboard/events"
+              href="/events"
               className={cn(buttonVariants({ variant: "outline", size: "sm" }), "w-full cursor-pointer")}
             >
               Browse Events
