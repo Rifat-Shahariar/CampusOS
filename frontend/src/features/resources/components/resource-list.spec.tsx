@@ -32,6 +32,7 @@ describe("ResourceList", () => {
         id: "c-1",
         code: "CSE 2115",
         name: "Data Structures",
+        semester: 4,
       },
     },
     {
@@ -54,6 +55,7 @@ describe("ResourceList", () => {
         id: "c-2",
         code: "CSE 3101",
         name: "Database Systems",
+        semester: 7,
       },
     },
   ];

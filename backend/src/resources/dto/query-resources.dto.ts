@@ -74,6 +74,19 @@ export class QueryResourcesDto {
   section?: string;
 
   @ApiPropertyOptional({
+    example: 4,
+    description: "Filter by course academic semester (1 to 12)",
+    minimum: 1,
+    maximum: 12,
+  })
+  @IsOptional()
+  @Type(() => Number)
+  @IsInt()
+  @Min(1)
+  @Max(12)
+  semester?: number;
+
+  @ApiPropertyOptional({
     example: true,
     description: "Filter by publication status (applicable for admin requests)",
   })

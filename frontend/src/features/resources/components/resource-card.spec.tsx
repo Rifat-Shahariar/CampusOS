@@ -24,6 +24,7 @@ describe("ResourceCard", () => {
       id: "course-uuid-202",
       code: "CSE 2115",
       name: "Data Structures",
+      semester: 4,
       department: {
         id: "dept-1",
         code: "CSE",

@@ -360,6 +360,7 @@ async function seedCourses(departmentIds: { cse: string; eee: string }) {
       code: "CSE 1101",
       name: "Structured Programming",
       description: "Problem solving with a procedural programming language.",
+      semester: 1,
     },
     {
       id: ids.courses.cse2115,
@@ -367,6 +368,7 @@ async function seedCourses(departmentIds: { cse: string; eee: string }) {
       code: "CSE 2115",
       name: "Data Structures and Algorithms",
       description: "Lists, trees, graphs, sorting and complexity analysis.",
+      semester: 4,
     },
     {
       id: ids.courses.cse3101,
@@ -374,6 +376,7 @@ async function seedCourses(departmentIds: { cse: string; eee: string }) {
       code: "CSE 3101",
       name: "Database Management Systems",
       description: "Relational modelling, SQL and transaction management.",
+      semester: 7,
     },
     {
       id: ids.courses.cse3201,
@@ -381,6 +384,7 @@ async function seedCourses(departmentIds: { cse: string; eee: string }) {
       code: "CSE 3201",
       name: "Computer Networks",
       description: "Layered protocols, routing and network applications.",
+      semester: 8,
     },
     {
       id: ids.courses.eee1101,
@@ -388,6 +392,7 @@ async function seedCourses(departmentIds: { cse: string; eee: string }) {
       code: "EEE 1101",
       name: "Electrical Circuits I",
       description: "DC circuit analysis and network theorems.",
+      semester: 1,
     },
     {
       id: ids.courses.eee2201,
@@ -395,6 +400,7 @@ async function seedCourses(departmentIds: { cse: string; eee: string }) {
       code: "EEE 2201",
       name: "Digital Electronics",
       description: "Logic gates, combinational and sequential circuits.",
+      semester: 5,
     },
   ];
 

@@ -18,6 +18,7 @@ describe("AuthService", () => {
     user: {
       findUnique: ReturnType<typeof vi.fn>;
       create: ReturnType<typeof vi.fn>;
+      update: ReturnType<typeof vi.fn>;
     };
     department: {
       findUnique: ReturnType<typeof vi.fn>;
@@ -43,6 +44,7 @@ describe("AuthService", () => {
       user: {
         findUnique: vi.fn(),
         create: vi.fn(),
+        update: vi.fn(),
       },
       department: {
         findUnique: vi.fn(),
@@ -432,6 +434,141 @@ describe("AuthService", () => {
       await expect(authService.getMe("usr-uuid-1")).rejects.toThrow(
         UnauthorizedException,
       );
+    });
+  });
+
+  describe("updateProfile", () => {
+    const existingUser = {
+      id: "usr-uuid-1",
+      name: "Rafid Hasan",
+      email: "student1@campusos.dev",
+      passwordHash: "super-secret-hash",
+      studentId: "CSE-2023-142",
+      batch: "67",
+      section: "A",
+      role: UserRole.STUDENT,
+      avatarUrl: null,
+      isActive: true,
+      departmentId: "dept-uuid-1",
+      createdAt: new Date(),
+      updatedAt: new Date(),
+      department: {
+        id: "dept-uuid-1",
+        name: "Computer Science & Engineering",
+        code: "CSE",
+      },
+    };
+
+    it("updates allowed fields and returns safe user data", async () => {
+      prismaMock.user.findUnique.mockResolvedValueOnce(existingUser);
+      prismaMock.department.findUnique.mockResolvedValueOnce({
+        id: "dept-uuid-2",
+        name: "Electrical & Electronic Engineering",
+        code: "EEE",
+        isActive: true,
+      });
+
+      const updatedUser = {
+        ...existingUser,
+        name: "Rafid Updated",
+        studentId: "CSE-2023-999",
+        batch: "68",
+        section: "B",
+        departmentId: "dept-uuid-2",
+        department: {
+          id: "dept-uuid-2",
+          name: "Electrical & Electronic Engineering",
+          code: "EEE",
+        },
+      };
+      // Student ID check: none found for new ID
+      prismaMock.user.findUnique.mockResolvedValueOnce(null);
+      prismaMock.user.update.mockResolvedValueOnce(updatedUser);
+
+      const result = await authService.updateProfile("usr-uuid-1", {
+        name: "Rafid Updated",
+        studentId: "CSE-2023-999",
+        batch: "68",
+        section: "B",
+        departmentId: "dept-uuid-2",
+      });
+
+      expect(result.id).toBe("usr-uuid-1");
+      expect(result.name).toBe("Rafid Updated");
+      expect(result.studentId).toBe("CSE-2023-999");
+      expect(result.batch).toBe("68");
+      expect(result.section).toBe("B");
+      expect(result.department?.code).toBe("EEE");
+      expect((result as any).passwordHash).toBeUndefined();
+    });
+
+    it("throws NotFoundException if user does not exist", async () => {
+      prismaMock.user.findUnique.mockResolvedValueOnce(null);
+      await expect(
+        authService.updateProfile("non-existent", { name: "Test" }),
+      ).rejects.toThrow(NotFoundException);
+    });
+
+    it("throws UnauthorizedException if user is deactivated", async () => {
+      prismaMock.user.findUnique.mockResolvedValueOnce({
+        ...existingUser,
+        isActive: false,
+      });
+      await expect(
+        authService.updateProfile("usr-uuid-1", { name: "Test" }),
+      ).rejects.toThrow(UnauthorizedException);
+    });
+
+    it("throws NotFoundException if target department is not found", async () => {
+      prismaMock.user.findUnique.mockResolvedValueOnce(existingUser);
+      prismaMock.department.findUnique.mockResolvedValueOnce(null);
+
+      await expect(
+        authService.updateProfile("usr-uuid-1", {
+          departmentId: "invalid-dept",
+        }),
+      ).rejects.toThrow(NotFoundException);
+    });
+
+    it("throws NotFoundException if target department is inactive", async () => {
+      prismaMock.user.findUnique.mockResolvedValueOnce(existingUser);
+      prismaMock.department.findUnique.mockResolvedValueOnce({
+        id: "dept-inactive",
+        isActive: false,
+      });
+
+      await expect(
+        authService.updateProfile("usr-uuid-1", {
+          departmentId: "dept-inactive",
+        }),
+      ).rejects.toThrow(NotFoundException);
+    });
+
+    it("throws ConflictException if studentId belongs to another user", async () => {
+      prismaMock.user.findUnique.mockResolvedValueOnce(existingUser);
+      // Another user has this student ID
+      prismaMock.user.findUnique.mockResolvedValueOnce({
+        id: "other-user-uuid",
+      });
+
+      await expect(
+        authService.updateProfile("usr-uuid-1", {
+          studentId: "DUPLICATE-ID",
+        }),
+      ).rejects.toThrow(ConflictException);
+    });
+
+    it("allows keeping own studentId without throwing conflict", async () => {
+      prismaMock.user.findUnique.mockResolvedValueOnce(existingUser);
+      prismaMock.user.update.mockResolvedValueOnce(existingUser);
+
+      const result = await authService.updateProfile("usr-uuid-1", {
+        studentId: "CSE-2023-142",
+      });
+
+      expect(result.studentId).toBe("CSE-2023-142");
+      // Uniqueness query should not have been run because it didn't change
+      expect(prismaMock.user.findUnique).toHaveBeenCalledTimes(1);
     });
   });
 });

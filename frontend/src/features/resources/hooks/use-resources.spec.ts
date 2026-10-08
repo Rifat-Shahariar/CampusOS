@@ -27,6 +27,7 @@ describe("useResources hook", () => {
           id: "c-1",
           code: "CSE 2115",
           name: "Data Structures",
+          semester: 4,
           department: {
             id: "d-1",
             code: "CSE",
@@ -148,6 +149,24 @@ describe("useResources hook", () => {
         section: "A",
       }),
     );
+  });
+
+  it("applies semester filter correctly when initialParams changes", async () => {
+    const getResourcesSpy = vi.spyOn(resourcesApi, "getResources").mockResolvedValue(mockResourcesResponse);
+
+    let params = { semester: undefined as number | undefined };
+    const { result, rerender } = renderHook(() => useResources(params));
+
+    await waitFor(() => expect(result.current.isLoading).toBe(false));
+
+    params = { semester: 4 };
+    rerender();
+
+    await waitFor(() => {
+      expect(getResourcesSpy).toHaveBeenCalledWith(
+        expect.objectContaining({ semester: 4 }),
+      );
+    });
   });
 
   it("resets page and updates filters using updateFilters", async () => {

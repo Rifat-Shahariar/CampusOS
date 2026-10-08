@@ -120,7 +120,44 @@ describe("Resources Module (e2e)", () => {
       expect(item).toHaveProperty("fileUrl");
       expect(item).toHaveProperty("course");
       expect(item.course).toHaveProperty("code");
+      expect(item.course).toHaveProperty("semester");
       expect(item).toHaveProperty("uploader");
+    });
+
+    it("should filter resources by semester=4", async () => {
+      const res = await request(app.getHttpServer())
+        .get(`/${API_PREFIX}/resources?semester=4`)
+        .expect(200);
+
+      expect(res.body.data.length).toBeGreaterThan(0);
+      for (const item of res.body.data) {
+        expect(item.course.semester).toBe(4);
+      }
+    });
+
+    it("should filter resources by semester=1", async () => {
+      const res = await request(app.getHttpServer())
+        .get(`/${API_PREFIX}/resources?semester=1`)
+        .expect(200);
+
+      expect(res.body.data.length).toBeGreaterThan(0);
+      for (const item of res.body.data) {
+        expect(item.course.semester).toBe(1);
+      }
+    });
+
+    it("should reject invalid semester values with 400", async () => {
+      await request(app.getHttpServer())
+        .get(`/${API_PREFIX}/resources?semester=0`)
+        .expect(400);
+
+      await request(app.getHttpServer())
+        .get(`/${API_PREFIX}/resources?semester=13`)
+        .expect(400);
+
+      await request(app.getHttpServer())
+        .get(`/${API_PREFIX}/resources?semester=abc`)
+        .expect(400);
     });
 
     it("should filter resources by search keyword", async () => {
@@ -201,6 +238,8 @@ describe("Resources Module (e2e)", () => {
       expect(course).toHaveProperty("id");
       expect(course).toHaveProperty("code");
       expect(course).toHaveProperty("name");
+      expect(course).toHaveProperty("semester");
+      expect(typeof course.semester).toBe("number");
       expect(course).toHaveProperty("department");
       expect(course.department).toHaveProperty("code");
     });

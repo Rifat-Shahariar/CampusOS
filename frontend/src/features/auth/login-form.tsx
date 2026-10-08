@@ -4,6 +4,7 @@ import React, { useState } from "react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import Link from "next/link";
+import Image from "next/image";
 import { useRouter } from "next/navigation";
 import { Eye, EyeOff } from "lucide-react";
 import { loginSchema, type LoginFormData } from "./schemas";
@@ -55,6 +56,16 @@ export function LoginForm() {
   return (
     <Card className="w-full max-w-md mx-auto shadow-sm">
       <CardHeader className="space-y-1 text-center">
+        <div className="flex justify-center mb-1">
+          <Image
+            src="/city-university-logo.png"
+            alt="City University Logo"
+            width={60}
+            height={45}
+            className="h-10 w-auto object-contain"
+            priority
+          />
+        </div>
         <CardTitle className="text-2xl font-bold">Sign In</CardTitle>
         <CardDescription>
           Enter your university email to access CampusOS

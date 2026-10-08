@@ -24,6 +24,51 @@ CampusOS/
 | Deployment | Frontend → Vercel · Backend → Render · Database → Supabase   |
 | Tooling    | npm workspaces · ESLint · Prettier                           |
 
+## Demo Credentials
+
+The following four pre-seeded demo accounts can be used to test and demonstrate all CampusOS role capabilities:
+
+**Password for all demo accounts:** `CampusOS#2026`
+
+### 1. ADMIN
+- **Email:** `admin@campusos.dev`
+- **Name:** Ayesha Rahman
+- **Demonstration Capabilities:**
+  - Full platform administration and oversight
+  - Club admin assignment and revocation
+  - Administrative oversight across events, clubs, and resources
+
+### 2. CLUB_ADMIN
+- **Email:** `club.admin@campusos.dev`
+- **Name:** Tanvir Ahmed
+- **Demonstration Capabilities:**
+  - Club & event management for assigned club
+  - Create and publish club announcements
+  - Create, update, and manage club events (capacity, dates, ticket fees)
+  - Live event attendee registration management and QR ticket check-in
+  - Access to real-time event attendance metrics
+
+### 3. RESOURCE_ADMIN
+- **Email:** `resource.admin@campusos.dev`
+- **Name:** Nusrat Jahan
+- **Demonstration Capabilities:**
+  - Academic Resource Hub management
+  - Upload course resources (Lecture Notes, Question Papers, Lab Manuals, Notices)
+  - Publish and unpublish academic resources
+  - Course and semester curriculum management
+
+### 4. STUDENT
+- **Email:** `student1@campusos.dev`
+- **Name:** Rafid Hasan
+- **Demonstration Capabilities:**
+  - Student registration and login
+  - Browse campus clubs and announcements
+  - Explore upcoming events and register with instant confirmation
+  - View personalized digital event entry ticket with unique ticket code & QR code
+  - Browse Academic Resource Hub organized hierarchically: Department → Semester → Section → Resources
+  - View user profile with clean academic details (never exposes database UUIDs)
+  - Edit profile with university department selection dropdown
+
 ## Prerequisites
 
 - Node.js 20.11+ (developed on Node 24)

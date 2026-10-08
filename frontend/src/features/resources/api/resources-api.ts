@@ -33,6 +33,9 @@ export const resourcesApi = {
     if (params.section?.trim()) {
       searchParams.set("section", params.section.trim());
     }
+    if (params.semester !== undefined && params.semester !== null) {
+      searchParams.set("semester", params.semester.toString());
+    }
     if (params.page && params.page > 1) {
       searchParams.set("page", params.page.toString());
     }

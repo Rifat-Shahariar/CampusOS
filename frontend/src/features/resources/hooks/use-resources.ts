@@ -29,6 +29,7 @@ export function useResources(initialParams: ResourcesQueryParams = {}) {
     initialParams.type !== prevInitialParams.type ||
     initialParams.batch !== prevInitialParams.batch ||
     initialParams.section !== prevInitialParams.section ||
+    initialParams.semester !== prevInitialParams.semester ||
     initialParams.page !== prevInitialParams.page ||
     initialParams.limit !== prevInitialParams.limit;
 
@@ -42,13 +43,13 @@ export function useResources(initialParams: ResourcesQueryParams = {}) {
     ...overrides,
   };
 
-  const { search, courseId, resourceType, type, batch, section, page, limit } = params;
+  const { search, courseId, resourceType, type, batch, section, semester, page, limit } = params;
 
   useEffect(() => {
     let isCurrent = true;
 
     resourcesApi
-      .getResources({ search, courseId, resourceType, type, batch, section, page, limit })
+      .getResources({ search, courseId, resourceType, type, batch, section, semester, page, limit })
       .then((res) => {
         if (isCurrent) {
           setResources(res.data);
@@ -67,7 +68,7 @@ export function useResources(initialParams: ResourcesQueryParams = {}) {
     return () => {
       isCurrent = false;
     };
-  }, [search, courseId, resourceType, type, batch, section, page, limit]);
+  }, [search, courseId, resourceType, type, batch, section, semester, page, limit]);
 
   const updateFilters = useCallback(
     (newParams: Partial<ResourcesQueryParams>) => {
@@ -84,7 +85,7 @@ export function useResources(initialParams: ResourcesQueryParams = {}) {
   const refetch = useCallback(() => {
     setIsLoading(true);
     resourcesApi
-      .getResources({ search, courseId, resourceType, type, batch, section, page, limit })
+      .getResources({ search, courseId, resourceType, type, batch, section, semester, page, limit })
       .then((res) => {
         setResources(res.data);
         setMeta(res.meta);
@@ -95,7 +96,7 @@ export function useResources(initialParams: ResourcesQueryParams = {}) {
         setError(err?.message || "Failed to load resources");
         setIsLoading(false);
       });
-  }, [search, courseId, resourceType, type, batch, section, page, limit]);
+  }, [search, courseId, resourceType, type, batch, section, semester, page, limit]);
 
   return {
     resources,

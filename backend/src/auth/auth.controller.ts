@@ -4,6 +4,7 @@ import {
   Get,
   HttpCode,
   HttpStatus,
+  Patch,
   Post,
   UseGuards,
 } from "@nestjs/common";
@@ -23,6 +24,7 @@ import {
   RefreshTokenDto,
   RegisterDto,
   SafeUserDto,
+  UpdateProfileDto,
 } from "./dto/index.js";
 import { JwtAuthGuard } from "./guards/index.js";
 import { CurrentUser } from "./decorators/index.js";
@@ -112,5 +114,31 @@ export class AuthController {
   })
   async getMe(@CurrentUser() user: AuthenticatedUser): Promise<SafeUserDto> {
     return this.authService.getMe(user.id);
+  }
+
+  @Patch("me")
+  @UseGuards(JwtAuthGuard)
+  @ApiBearerAuth()
+  @ApiOperation({
+    summary: "Update current authenticated user profile",
+    description:
+      "Updates personal profile details for the authenticated user. Email and role cannot be changed.",
+  })
+  @ApiOkResponse({
+    type: SafeUserDto,
+    description: "Updated user profile details",
+  })
+  @ApiConflictResponse({ description: "Student ID already in use" })
+  @ApiNotFoundResponse({
+    description: "Referenced department not found or inactive",
+  })
+  @ApiUnauthorizedResponse({
+    description: "Missing, expired, or invalid token",
+  })
+  async updateProfile(
+    @CurrentUser() user: AuthenticatedUser,
+    @Body() dto: UpdateProfileDto,
+  ): Promise<SafeUserDto> {
+    return this.authService.updateProfile(user.id, dto);
   }
 }

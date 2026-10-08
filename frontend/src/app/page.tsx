@@ -1,4 +1,5 @@
 import Link from "next/link";
+import Image from "next/image";
 import { siteConfig } from "@/config/site";
 import { buttonVariants } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
@@ -10,6 +11,16 @@ import { cn } from "@/lib/utils";
 export default function Home() {
   return (
     <main className="mx-auto flex w-full max-w-screen-2xl flex-1 flex-col items-center justify-center px-4 py-16 text-center sm:px-6 lg:px-8">
+      <div className="mb-4 flex justify-center">
+        <Image
+          src="/city-university-logo.png"
+          alt="City University Logo"
+          width={96}
+          height={72}
+          className="h-16 w-auto object-contain"
+          priority
+        />
+      </div>
       <h1 className="text-3xl font-semibold tracking-tight sm:text-4xl lg:text-5xl 3xl:text-6xl">
         {siteConfig.name}
       </h1>

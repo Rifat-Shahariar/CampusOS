@@ -4,6 +4,7 @@ import React, { useEffect, useState } from "react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import Link from "next/link";
+import Image from "next/image";
 import { useRouter } from "next/navigation";
 import { ChevronDown, Eye, EyeOff, Loader2 } from "lucide-react";
 import { registerSchema, type RegisterFormData } from "./schemas";
@@ -109,6 +110,16 @@ export function RegisterForm() {
   return (
     <Card className="w-full max-w-lg mx-auto shadow-sm">
       <CardHeader className="space-y-1 text-center">
+        <div className="flex justify-center mb-1">
+          <Image
+            src="/city-university-logo.png"
+            alt="City University Logo"
+            width={60}
+            height={45}
+            className="h-10 w-auto object-contain"
+            priority
+          />
+        </div>
         <CardTitle className="text-2xl font-bold">Student Registration</CardTitle>
         <CardDescription>
           Create your CampusOS student account to participate in campus activities

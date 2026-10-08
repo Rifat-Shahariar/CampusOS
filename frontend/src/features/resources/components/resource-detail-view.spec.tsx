@@ -24,6 +24,7 @@ describe("ResourceDetailView", () => {
       id: "course-uuid-888",
       code: "CSE 3101",
       name: "Database Systems",
+      semester: 7,
       department: {
         id: "dept-1",
         code: "CSE",

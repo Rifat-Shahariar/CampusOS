@@ -2,12 +2,12 @@
 
 import React, { useState } from "react";
 import Link from "next/link";
+import Image from "next/image";
 import { usePathname } from "next/navigation";
 import {
   Calendar,
   Compass,
   FileText,
-  GraduationCap,
   LayoutDashboard,
   LogOut,
   Menu,
@@ -29,6 +29,7 @@ const navItems: NavItem[] = [
   { name: "Clubs", href: "/clubs", icon: Compass },
   { name: "Events", href: "/events", icon: Calendar },
   { name: "Resource Hub", href: "/resources", icon: FileText },
+  { name: "Profile", href: "/profile", icon: UserIcon },
 ];
 
 export function DashboardShell({ children }: { children: React.ReactNode }) {
@@ -40,9 +41,19 @@ export function DashboardShell({ children }: { children: React.ReactNode }) {
     <div className="flex min-h-screen bg-muted/20">
       {/* Desktop Sidebar */}
       <aside className="hidden md:flex md:w-64 md:flex-col md:fixed md:inset-y-0 border-r border-border bg-card">
-        <div className="flex h-16 items-center px-6 border-b border-border space-x-2.5">
-          <GraduationCap className="size-6 text-primary" />
-          <span className="font-bold text-lg tracking-tight">CampusOS</span>
+        <div className="flex h-16 items-center px-5 border-b border-border space-x-3">
+          <Image
+            src="/city-university-logo.png"
+            alt="City University Logo"
+            width={36}
+            height={28}
+            className="h-8 w-auto object-contain shrink-0"
+            priority
+          />
+          <div className="flex flex-col min-w-0">
+            <span className="font-bold text-base tracking-tight leading-tight">CampusOS</span>
+            <span className="text-[10px] text-muted-foreground truncate leading-none">City University</span>
+          </div>
         </div>
 
         <nav className="flex-1 space-y-1 px-3 py-4">
@@ -74,15 +85,21 @@ export function DashboardShell({ children }: { children: React.ReactNode }) {
         <div className="p-3 border-t border-border">
           {user ? (
             <div className="flex items-center gap-3 px-3 py-2 rounded-lg bg-muted/40">
-              <div className="flex size-8 items-center justify-center rounded-full bg-primary/10 text-primary">
-                <UserIcon className="size-4" />
-              </div>
-              <div className="flex flex-col min-w-0 flex-1">
-                <span className="text-xs font-semibold truncate">{user.name}</span>
-                <span className="text-[10px] text-muted-foreground truncate">
-                  {user.role}
-                </span>
-              </div>
+              <Link
+                href="/profile"
+                className="flex items-center gap-3 min-w-0 flex-1 hover:opacity-80 transition-opacity"
+                title="View Profile"
+              >
+                <div className="flex size-8 items-center justify-center rounded-full bg-primary/10 text-primary">
+                  <UserIcon className="size-4" />
+                </div>
+                <div className="flex flex-col min-w-0 flex-1">
+                  <span className="text-xs font-semibold truncate">{user.name}</span>
+                  <span className="text-[10px] text-muted-foreground truncate">
+                    {user.role}
+                  </span>
+                </div>
+              </Link>
               <Button
                 variant="ghost"
                 size="icon-xs"
@@ -126,15 +143,28 @@ export function DashboardShell({ children }: { children: React.ReactNode }) {
                 <Menu className="size-5" />
               )}
             </Button>
-            <span className="text-sm font-semibold md:hidden">CampusOS</span>
+            <div className="flex items-center gap-2 md:hidden">
+              <Image
+                src="/city-university-logo.png"
+                alt="City University Logo"
+                width={26}
+                height={20}
+                className="h-6 w-auto object-contain shrink-0"
+              />
+              <span className="text-sm font-semibold">CampusOS</span>
+            </div>
           </div>
 
           <div className="flex items-center gap-3">
             {user ? (
               <>
-                <span className="hidden sm:inline-block text-xs text-muted-foreground">
+                <Link
+                  href="/profile"
+                  className="hidden sm:inline-block text-xs text-muted-foreground hover:text-foreground transition-colors"
+                  title="View Profile"
+                >
                   {user.email}
-                </span>
+                </Link>
                 <Button
                   variant="outline"
                   size="sm"

@@ -283,6 +283,7 @@ model Course {
   code         String   @unique
   name         String
   description  String?
+  semester     Int      @default(1)
   isActive     Boolean  @default(true) @map("is_active")
   createdAt    DateTime @default(now()) @map("created_at")
   updatedAt    DateTime @updatedAt @map("updated_at")
@@ -291,6 +292,7 @@ model Course {
   resources  Resource[]
 
   @@index([departmentId])
+  @@index([semester])
   @@map("courses")
 }
 

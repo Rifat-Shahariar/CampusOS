@@ -67,6 +67,9 @@ export class ResourcesService {
       resourceType?: ResourceType;
       batch?: string;
       section?: string;
+      course?: {
+        semester?: number;
+      };
       OR?: Array<{
         title?: { contains: string; mode: "insensitive" };
         description?: { contains: string; mode: "insensitive" };
@@ -101,6 +104,12 @@ export class ResourcesService {
       where.section = query.section;
     }
 
+    if (query.semester !== undefined) {
+      where.course = {
+        semester: Number(query.semester),
+      };
+    }
+
     if (query.search) {
       where.OR = [
         { title: { contains: query.search, mode: "insensitive" } },
@@ -119,6 +128,7 @@ export class ResourcesService {
               id: true,
               code: true,
               name: true,
+              semester: true,
               department: {
                 select: {
                   id: true,
@@ -164,6 +174,7 @@ export class ResourcesService {
         id: true,
         code: true,
         name: true,
+        semester: true,
         department: {
           select: {
             id: true,
@@ -189,6 +200,7 @@ export class ResourcesService {
             id: true,
             code: true,
             name: true,
+            semester: true,
             department: {
               select: {
                 id: true,
@@ -261,6 +273,7 @@ export class ResourcesService {
             id: true,
             code: true,
             name: true,
+            semester: true,
             department: {
               select: {
                 id: true,
@@ -331,6 +344,7 @@ export class ResourcesService {
             id: true,
             code: true,
             name: true,
+            semester: true,
             department: {
               select: {
                 id: true,
@@ -375,6 +389,7 @@ export class ResourcesService {
             id: true,
             code: true,
             name: true,
+            semester: true,
             department: {
               select: {
                 id: true,

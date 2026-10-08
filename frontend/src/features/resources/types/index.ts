@@ -15,6 +15,7 @@ export interface ResourceCourseInfo {
   id: string;
   code: string;
   name: string;
+  semester: number;
   department?: ResourceDepartmentInfo;
 }
 
@@ -53,6 +54,7 @@ export interface CourseItem {
   id: string;
   code: string;
   name: string;
+  semester: number;
   department: ResourceDepartmentInfo;
 }
 
@@ -63,6 +65,7 @@ export interface ResourcesQueryParams {
   type?: ResourceType;
   batch?: string;
   section?: string;
+  semester?: number;
   page?: number;
   limit?: number;
 }

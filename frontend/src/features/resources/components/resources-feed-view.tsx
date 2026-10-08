@@ -4,7 +4,7 @@ import { useRouter, useSearchParams } from "next/navigation";
 import { BookOpen } from "lucide-react";
 import { useResources } from "../hooks/use-resources";
 import { ResourceFilters } from "./resource-filters";
-import { ResourceList } from "./resource-list";
+import { ResourceHierarchyView } from "./resource-hierarchy-view";
 import type { ResourceType } from "../types";
 
 export function ResourcesFeedView() {
@@ -99,8 +99,8 @@ export function ResourcesFeedView() {
         onResetFilters={handleResetFilters}
       />
 
-      {/* Resources Grid & Pagination */}
-      <ResourceList
+      {/* Resources Hierarchical View & Pagination */}
+      <ResourceHierarchyView
         resources={resources}
         meta={meta}
         isLoading={isLoading}

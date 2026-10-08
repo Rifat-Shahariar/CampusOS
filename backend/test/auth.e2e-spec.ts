@@ -39,6 +39,9 @@ describe("Authentication & Persistent JWT Sessions (e2e)", () => {
       await prisma.user.deleteMany({
         where: { email: { contains: "e2e-test-" } },
       });
+      await prisma.department.deleteMany({
+        where: { code: { contains: "INACT-" } },
+      });
     }
     await app.close();
   });
@@ -200,5 +203,124 @@ describe("Authentication & Persistent JWT Sessions (e2e)", () => {
       .expect(401);
 
     await restartedApp.close();
+  });
+
+  it("PATCH /auth/me updates allowed fields and enforces security restrictions", async () => {
+    // Create two students: userA and userB
+    const studentAEmail = `e2e-test-a-${uniqueSuffix}@campusos.dev`;
+    const studentBEmail = `e2e-test-b-${uniqueSuffix}@campusos.dev`;
+    const studentAId = `STU-A-${uniqueSuffix}`;
+    const studentBId = `STU-B-${uniqueSuffix}`;
+
+    const regARes = await request(app.getHttpServer())
+      .post(`/${API_PREFIX}/auth/register`)
+      .send({
+        name: "Student A",
+        email: studentAEmail,
+        password: "TestPassword#2026",
+        studentId: studentAId,
+        departmentId: testDeptId,
+      })
+      .expect(201);
+
+    await request(app.getHttpServer())
+      .post(`/${API_PREFIX}/auth/register`)
+      .send({
+        name: "Student B",
+        email: studentBEmail,
+        password: "TestPassword#2026",
+        studentId: studentBId,
+        departmentId: testDeptId,
+      })
+      .expect(201);
+
+    const tokenA = regARes.body.accessToken;
+
+    // 1. Unauthenticated PATCH is rejected
+    await request(app.getHttpServer())
+      .patch(`/${API_PREFIX}/auth/me`)
+      .send({ name: "Unauthenticated Update" })
+      .expect(401);
+
+    // 2. Role cannot be changed through profile update
+    await request(app.getHttpServer())
+      .patch(`/${API_PREFIX}/auth/me`)
+      .set("Authorization", `Bearer ${tokenA}`)
+      .send({ role: "ADMIN" })
+      .expect(400);
+
+    // 3. Email cannot be changed through profile update
+    await request(app.getHttpServer())
+      .patch(`/${API_PREFIX}/auth/me`)
+      .set("Authorization", `Bearer ${tokenA}`)
+      .send({ email: "hacked@campusos.dev" })
+      .expect(400);
+
+    // 4. Invalid department UUID format is rejected
+    await request(app.getHttpServer())
+      .patch(`/${API_PREFIX}/auth/me`)
+      .set("Authorization", `Bearer ${tokenA}`)
+      .send({ departmentId: "not-a-uuid" })
+      .expect(400);
+
+    // 5. Non-existent department UUID is rejected
+    await request(app.getHttpServer())
+      .patch(`/${API_PREFIX}/auth/me`)
+      .set("Authorization", `Bearer ${tokenA}`)
+      .send({ departmentId: "00000000-0000-4000-8000-000000000000" })
+      .expect(404);
+
+    // 6. Inactive department is rejected
+    const inactiveDept = await prisma.department.create({
+      data: {
+        name: `Inactive Dept ${uniqueSuffix}`,
+        code: `INACT-${uniqueSuffix}`,
+        isActive: false,
+      },
+    });
+
+    await request(app.getHttpServer())
+      .patch(`/${API_PREFIX}/auth/me`)
+      .set("Authorization", `Bearer ${tokenA}`)
+      .send({ departmentId: inactiveDept.id })
+      .expect(404);
+
+    // 7. Duplicate student ID is rejected (collides with studentB)
+    await request(app.getHttpServer())
+      .patch(`/${API_PREFIX}/auth/me`)
+      .set("Authorization", `Bearer ${tokenA}`)
+      .send({ studentId: studentBId })
+      .expect(409);
+
+    // 8. Valid update succeeds
+    const patchRes = await request(app.getHttpServer())
+      .patch(`/${API_PREFIX}/auth/me`)
+      .set("Authorization", `Bearer ${tokenA}`)
+      .send({
+        name: "Student A Updated",
+        studentId: `STU-A-NEW-${uniqueSuffix}`,
+        batch: "70",
+        section: "C",
+      })
+      .expect(200);
+
+    expect(patchRes.body.name).toBe("Student A Updated");
+    expect(patchRes.body.studentId).toBe(`STU-A-NEW-${uniqueSuffix}`);
+    expect(patchRes.body.batch).toBe("70");
+    expect(patchRes.body.section).toBe("C");
+    expect(patchRes.body.passwordHash).toBeUndefined();
+    expect(patchRes.body.refreshToken).toBeUndefined();
+
+    // 9. Subsequent GET /auth/me returns updated profile
+    const getMeRes = await request(app.getHttpServer())
+      .get(`/${API_PREFIX}/auth/me`)
+      .set("Authorization", `Bearer ${tokenA}`)
+      .expect(200);
+
+    expect(getMeRes.body.name).toBe("Student A Updated");
+    expect(getMeRes.body.studentId).toBe(`STU-A-NEW-${uniqueSuffix}`);
+    expect(getMeRes.body.batch).toBe("70");
+    expect(getMeRes.body.section).toBe("C");
+    expect(getMeRes.body.passwordHash).toBeUndefined();
   });
 });

@@ -43,6 +43,7 @@ describe("ResourcesService", () => {
     id: "course-uuid-001",
     code: "CSE 2115",
     name: "Data Structures",
+    semester: 4,
     department: {
       id: "dept-uuid-001",
       code: "CSE",
@@ -154,17 +155,35 @@ describe("ResourcesService", () => {
         where: { isPublished: false },
       });
     });
+
+    it("should filter resources by course semester", async () => {
+      prismaMock.resource.count.mockResolvedValue(1);
+      prismaMock.resource.findMany.mockResolvedValue([mockResource]);
+
+      await service.findAll({ semester: 4 });
+
+      expect(prismaMock.resource.count).toHaveBeenCalledWith({
+        where: {
+          isPublished: true,
+          course: { semester: 4 },
+        },
+      });
+    });
   });
 
   describe("getCourses", () => {
-    it("should return active courses ordered by code", async () => {
+    it("should return active courses ordered by code including semester", async () => {
       prismaMock.course.findMany.mockResolvedValue([mockCourse]);
 
       const result = await service.getCourses();
 
       expect(prismaMock.course.findMany).toHaveBeenCalledWith({
         where: { isActive: true },
-        select: expect.objectContaining({ id: true, code: true }),
+        select: expect.objectContaining({
+          id: true,
+          code: true,
+          semester: true,
+        }),
         orderBy: { code: "asc" },
       });
       expect(result).toEqual([mockCourse]);

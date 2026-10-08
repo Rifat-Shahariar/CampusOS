@@ -16,6 +16,7 @@ import type {
   LoginDto,
   RegisterDto,
   SafeUserDto,
+  UpdateProfileDto,
 } from "./dto/index.js";
 import type { JwtPayload, JwtRefreshPayload } from "./interfaces/index.js";
 
@@ -290,6 +291,105 @@ export class AuthService {
     }
 
     return this.toSafeUser(user);
+  }
+
+  /**
+   * Update editable profile fields for the authenticated user.
+   */
+  async updateProfile(
+    userId: string,
+    dto: UpdateProfileDto,
+  ): Promise<SafeUserDto> {
+    const user = await this.prisma.user.findUnique({
+      where: { id: userId },
+      include: {
+        department: {
+          select: {
+            id: true,
+            name: true,
+            code: true,
+          },
+        },
+      },
+    });
+
+    if (!user) {
+      throw new NotFoundException("User not found");
+    }
+
+    if (!user.isActive) {
+      throw new UnauthorizedException("Account is deactivated");
+    }
+
+    // 1. If departmentId is provided, verify it exists and is active
+    if (dto.departmentId !== undefined) {
+      const department = await this.prisma.department.findUnique({
+        where: { id: dto.departmentId },
+        select: { id: true, isActive: true },
+      });
+      if (!department || !department.isActive) {
+        throw new NotFoundException(
+          "Referenced department not found or inactive",
+        );
+      }
+    }
+
+    // 2. If studentId is provided and different from current, check uniqueness
+    if (dto.studentId !== undefined) {
+      const trimmedStudentId = dto.studentId.trim();
+      if (trimmedStudentId && trimmedStudentId !== user.studentId) {
+        const existingStudentId = await this.prisma.user.findUnique({
+          where: { studentId: trimmedStudentId },
+          select: { id: true },
+        });
+        if (existingStudentId && existingStudentId.id !== userId) {
+          throw new ConflictException(
+            "An account with this student ID already exists",
+          );
+        }
+      }
+    }
+
+    // 3. Prepare update data
+    const dataToUpdate: {
+      name?: string;
+      studentId?: string | null;
+      batch?: string | null;
+      section?: string | null;
+      departmentId?: string;
+    } = {};
+
+    if (dto.name !== undefined) {
+      dataToUpdate.name = dto.name.trim();
+    }
+    if (dto.studentId !== undefined) {
+      dataToUpdate.studentId = dto.studentId.trim() || null;
+    }
+    if (dto.batch !== undefined) {
+      dataToUpdate.batch = dto.batch.trim() || null;
+    }
+    if (dto.section !== undefined) {
+      dataToUpdate.section = dto.section.trim() || null;
+    }
+    if (dto.departmentId !== undefined) {
+      dataToUpdate.departmentId = dto.departmentId;
+    }
+
+    const updatedUser = await this.prisma.user.update({
+      where: { id: userId },
+      data: dataToUpdate,
+      include: {
+        department: {
+          select: {
+            id: true,
+            name: true,
+            code: true,
+          },
+        },
+      },
+    });
+
+    return this.toSafeUser(updatedUser);
   }
 
   /**

@@ -17,6 +17,14 @@ export interface RegisterData {
   departmentId: string;
 }
 
+export interface UpdateProfileData {
+  name?: string;
+  studentId?: string;
+  batch?: string;
+  section?: string;
+  departmentId?: string;
+}
+
 export const authService = {
   async login(credentials: LoginCredentials): Promise<AuthResponse> {
     const data = await api.post<AuthResponse>("/auth/login", credentials, {
@@ -49,5 +57,9 @@ export const authService = {
 
   async getCurrentUser(): Promise<User> {
     return api.get<User>("/auth/me");
+  },
+
+  async updateProfile(data: UpdateProfileData): Promise<User> {
+    return api.patch<User>("/auth/me", data);
   },
 };
