@@ -41,6 +41,25 @@ cp backend/.env.example backend/.env
 Fill in the values in both env files — see [frontend/.env.example](frontend/.env.example)
 and [backend/.env.example](backend/.env.example). Never commit real env files.
 
+### Database (Supabase)
+
+The backend reads two connection strings from `backend/.env` (git-ignored):
+
+- `DATABASE_URL` — runtime connection (Supabase **transaction pooler**, port 6543)
+- `DIRECT_URL` — direct connection used by Prisma Migrate/seed (**direct/session**, port 5432)
+
+Provisions in Supabase come from **Project Settings → Database → Connection string**.
+Create migrations and load the demo data from the repository root:
+
+```bash
+npm run prisma:migrate --workspace backend   # apply/create migrations (uses DIRECT_URL)
+npm run prisma:seed                          # idempotent demo data
+```
+
+Any PostgreSQL 14+ works for local development — point both variables at it. See
+[docs/architecture.md](docs/architecture.md) for the full Supabase setup and
+migration/seed workflow.
+
 ## Development commands
 
 Run from the repository root:
@@ -58,6 +77,8 @@ Run from the repository root:
 | `npm run test`            | Run workspace test suites                            |
 | `npm run prisma:validate` | Validate `backend/prisma/schema.prisma`              |
 | `npm run prisma:generate` | Generate the Prisma client                           |
+| `npm run prisma:migrate`  | Apply/create database migrations (via `DIRECT_URL`)  |
+| `npm run prisma:seed`     | Load the idempotent demo data                        |
 
 ### Per-workspace commands
 

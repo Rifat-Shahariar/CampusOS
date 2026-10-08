@@ -259,17 +259,51 @@ notice priorities.
 
 ### Migration workflow
 
+Two connection strings live in `backend/.env` (both git-ignored):
+
+| Variable       | Used by                                  | Supabase connection                  |
+| -------------- | ---------------------------------------- | ------------------------------------ |
+| `DATABASE_URL` | the running API (`PrismaService`)        | **Transaction pooler** (port `6543`) |
+| `DIRECT_URL`   | Prisma CLI — migrate / seed / introspect | **Direct / session** (port `5432`)   |
+
+Supabase's pooled endpoint runs pgbouncer in transaction mode, which cannot run
+migrations, so `backend/prisma7.config.ts` hands the Prisma CLI
+`DIRECT_URL ?? DATABASE_URL`. The NestJS app always connects with `DATABASE_URL`,
+and `PrismaService` strips Prisma-only URL parameters (`pgbouncer`, `schema`, …)
+before the URL reaches node-postgres.
+
+**Supabase setup requirements**
+
+1. A Supabase project with its PostgreSQL database provisioned (free tier is fine).
+2. From **Project Settings → Database → Connection string**, copy both:
+   - the _Transaction pooler_ URI (port `6543`) → `DATABASE_URL`
+   - the _Direct connection_ / session URI (port `5432`) → `DIRECT_URL`
+3. Replace `<password>` with the database password and drop Prisma-only query
+   parameters such as `?pgbouncer=true` / `?schema=public` from `DATABASE_URL`.
+4. Set `FRONTEND_URL` (and optionally `CORS_ORIGINS`) to your browser origin.
+
+**Commands**
+
 ```bash
-npm run prisma:validate    # schema is valid
-npm run prisma:generate    # regenerate the client
-docker/psql …              # a reachable PostgreSQL is required from here on
-npm run prisma:migrate --workspace backend   # prisma migrate dev
-npm run prisma:seed        # load the demo data
+npm run prisma:validate                     # schema is valid
+npm run prisma:generate                     # regenerate the client
+npm run prisma:migrate --workspace backend  # prisma migrate dev (uses DIRECT_URL)
+npm run prisma:seed                         # load the demo data
+npm run prisma:migrate --workspace backend -- --name <change>   # add a migration
 ```
 
-Prisma uses `DATABASE_URL` from `backend/.env` for all of the above. Supabase
-pooled connections are the runtime default; point `DIRECT_URL` at the direct
-connection when a migration needs to bypass the pooler.
+A reachable PostgreSQL is required from `prisma:migrate` onward. The initial
+migration lives at `backend/prisma/migrations/<timestamp>_init/`.
+
+**Local development workflow**
+
+- Any PostgreSQL 14+ works locally — Supabase's hosted database, a container, or a
+  locally installed server. Point both variables at it; for a plain local server
+  they are usually identical (e.g.
+  `postgresql://postgres:postgres@localhost:5432/campusos`).
+- Re-running `npm run prisma:seed` is safe: the seed is idempotent.
+- Confirm the API↔database link with `GET /api/v1/health/ready`: `200`
+  `{ "database": "up" }` when reachable, `503` when it is not.
 
 ### Known gaps
 

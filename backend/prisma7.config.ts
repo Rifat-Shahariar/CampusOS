@@ -18,6 +18,10 @@ export default defineConfig({
     seed: "tsx prisma/seed.ts",
   },
   datasource: {
-    url: process.env["DATABASE_URL"],
+    // Prisma CLI operations (migrate / studio / introspect) must run over the
+    // direct connection: Supabase's pooled runtime URL (pgbouncer, port 6543)
+    // cannot be used for migrations. The running application keeps using
+    // DATABASE_URL (see src/database/prisma.service.ts).
+    url: process.env["DIRECT_URL"] ?? process.env["DATABASE_URL"],
   },
 });
