@@ -1,4 +1,7 @@
+import Link from "next/link";
 import { siteConfig } from "@/config/site";
+import { buttonVariants } from "@/components/ui/button";
+import { cn } from "@/lib/utils";
 
 /**
  * Application shell for the root route.
@@ -13,6 +16,24 @@ export default function Home() {
       <p className="mt-3 max-w-md text-sm text-muted-foreground sm:max-w-lg sm:text-base">
         {siteConfig.description}
       </p>
+
+      <div className="mt-8 flex flex-wrap items-center justify-center gap-4">
+        <Link
+          href="/login"
+          className={cn(buttonVariants({ size: "lg" }), "h-10 px-5 font-medium cursor-pointer")}
+        >
+          Sign In
+        </Link>
+        <Link
+          href="/register"
+          className={cn(
+            buttonVariants({ variant: "outline", size: "lg" }),
+            "h-10 px-5 font-medium cursor-pointer",
+          )}
+        >
+          Student Registration
+        </Link>
+      </div>
     </main>
   );
 }
